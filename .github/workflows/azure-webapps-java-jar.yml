@@ -3,7 +3,7 @@ name: Deploy Spring Boot App to Azure
 on:
   push:
     branches:
-      - release/v1.0.0
+      - master
 
 jobs:
   build-and-deploy:
@@ -19,11 +19,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant permission to Gradle wrapper
-        run: chmod +x ./gradlew
-
-      - name: Build project with Gradle
-        run: ./gradlew clean build -x test
+      - name: Build project with Maven
+        run: mvn clean package -DskipTests
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
@@ -31,4 +28,4 @@ jobs:
           app-name: detox  
           slot-name: production
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: build/libs/*.jar 
+          package: target/*.jar
