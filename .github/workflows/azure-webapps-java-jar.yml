@@ -22,14 +22,10 @@ jobs:
       - name: Build project with Maven
         run: mvn clean package -DskipTests
 
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-
-      - name: Deploy to Azure Web App
+      - name: Deploy to Azure Web App using Publish Profile
         uses: azure/webapps-deploy@v2
         with:
-          app-name: detox  
-          slot-name: production
+          app-name: detox             # Tên App Service
+          slot-name: production       # Slot (mặc định là production)
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: target/*.jar
