@@ -157,7 +157,7 @@ public class ProfileServiceImpl implements ProfileService {
             profile.getAddresses().clear();
             for (Address address : addressList) {
                 address.setProfile(profile);
-                address.setCreatedBy(userUtilService.getIdCurrentUser());
+               address.setCreatedBy(userUtilService.getIdCurrentUser());
                 address.setUpdatedBy(userUtilService.getIdCurrentUser());
             }
             profile.getAddresses().addAll(addressList);
@@ -168,6 +168,9 @@ public class ProfileServiceImpl implements ProfileService {
 
     private void updateInformationProfile(Profile profile, UpdateProfileRequest request) {
         Information information = profile.getInformation();
+        if(information==null){
+            information = new Information();
+        }
         information.setProfile(profile);
         profile.setInformation(information);
         information.setUpdatedBy(userUtilService.getIdCurrentUser());

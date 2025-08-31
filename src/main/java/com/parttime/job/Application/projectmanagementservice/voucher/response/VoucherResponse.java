@@ -14,5 +14,6 @@ public class VoucherResponse {
     private boolean isActive;
     private Date createdAt;
     private String image;
+    private int exchangePoint;
 
 }

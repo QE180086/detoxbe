@@ -2,15 +2,13 @@ package com.parttime.job.Application.projectmanagementservice.cart.entity;
 
 import com.parttime.job.Application.common.entity.BaseEntity;
 import com.parttime.job.Application.projectmanagementservice.product.entity.Product;
-import com.parttime.job.Application.projectmanagementservice.usermanagement.entity.User;
-import com.parttime.job.Application.projectmanagementservice.voucher.entity.Voucher;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "cart")
+@Table(name = "cart-item")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

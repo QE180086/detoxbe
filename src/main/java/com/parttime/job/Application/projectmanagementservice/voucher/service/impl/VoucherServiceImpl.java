@@ -5,10 +5,21 @@ import com.parttime.job.Application.common.exception.AppException;
 import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
 import com.parttime.job.Application.common.utils.PagingUtil;
+import com.parttime.job.Application.projectmanagementservice.point.entity.Point;
+import com.parttime.job.Application.projectmanagementservice.point.repository.PointRepository;
+import com.parttime.job.Application.projectmanagementservice.usermanagement.constant.UserConstant;
+import com.parttime.job.Application.projectmanagementservice.usermanagement.entity.User;
+import com.parttime.job.Application.projectmanagementservice.usermanagement.repository.UserRepository;
+import com.parttime.job.Application.projectmanagementservice.usermanagement.service.UserUtilService;
+import com.parttime.job.Application.projectmanagementservice.voucher.entity.UserVoucher;
 import com.parttime.job.Application.projectmanagementservice.voucher.entity.Voucher;
+import com.parttime.job.Application.projectmanagementservice.voucher.mapper.UserVoucherMapper;
 import com.parttime.job.Application.projectmanagementservice.voucher.mapper.VoucherMapper;
+import com.parttime.job.Application.projectmanagementservice.voucher.repository.UserVoucherRepository;
 import com.parttime.job.Application.projectmanagementservice.voucher.repository.VoucherRepository;
+import com.parttime.job.Application.projectmanagementservice.voucher.request.UserVoucherRequest;
 import com.parttime.job.Application.projectmanagementservice.voucher.request.VoucherRequest;
+import com.parttime.job.Application.projectmanagementservice.voucher.response.UserVoucherResponse;
 import com.parttime.job.Application.projectmanagementservice.voucher.response.VoucherResponse;
 import com.parttime.job.Application.projectmanagementservice.voucher.service.VoucherService;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +37,13 @@ import static com.parttime.job.Application.common.constant.GlobalVariable.PAGE_S
 @Service
 @RequiredArgsConstructor
 public class VoucherServiceImpl implements VoucherService {
-    private VoucherRepository voucherRepository;
-    private VoucherMapper voucherMapper;
+    private final UserVoucherRepository userVoucherRepository;
+    private final UserRepository userRepository;
+    private final VoucherRepository voucherRepository;
+    private final VoucherMapper voucherMapper;
+    private final UserVoucherMapper userVoucherMapper;
+    private final UserUtilService userUtilService;
+    private final PointRepository pointRepository;
 
     @Override
     public PagingResponse<VoucherResponse> getAllVouchers(String searchText, PagingRequest request) {
@@ -58,6 +74,7 @@ public class VoucherServiceImpl implements VoucherService {
         voucher.setMinOrderValue(request.getMinOrderValue());
         voucher.setActive(request.isActive());
         voucher.setImage(request.getImage());
+        voucher.setExchangePoint(request.getExchangePoint());
         voucherRepository.save(voucher);
         return voucherMapper.toDTO(voucher);
     }
@@ -101,6 +118,10 @@ public class VoucherServiceImpl implements VoucherService {
             existingVoucher.setImage(request.getImage());
             updated = true;
         }
+        if (!Objects.equals(existingVoucher.getExchangePoint(), request.getExchangePoint())) {
+            existingVoucher.setExchangePoint(request.getExchangePoint());
+            updated = true;
+        }
         if (updated) {
             existingVoucher = voucherRepository.save(existingVoucher);
         }
@@ -115,6 +136,73 @@ public class VoucherServiceImpl implements VoucherService {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Voucher not found");
         }
         voucherRepository.delete(voucher.get());
+    }
+
+    @Override
+    public UserVoucherResponse userReceiveVoucher(UserVoucherRequest request) {
+        User user = userRepository.findById(request.getUserId()).orElseThrow(
+                () -> new AppException(MessageCodeConstant.M003_NOT_FOUND, UserConstant.USER_NOT_FOUND));
+
+        Voucher voucher = voucherRepository.findById(request.getVoucherId()).orElseThrow(
+                () -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Voucher not found"));
+
+        if (userVoucherRepository.existsByUserAndVoucher(user, voucher)) {
+            throw new AppException(MessageCodeConstant.M005_INVALID, "User has already received this voucher");
+        }
+
+        UserVoucher userVoucher = new UserVoucher();
+        userVoucher.setUser(user);
+        userVoucher.setVoucher(voucher);
+        userVoucher.setUsed(false);
+        userVoucherRepository.save(userVoucher);
+
+        return userVoucherMapper.toDTO(userVoucher);
+    }
+
+    @Override
+    public PagingResponse<UserVoucherResponse> getVouchersByUser(String userId, PagingRequest request) {
+        Sort sort = PagingUtil.createSort(request);
+        PageRequest pageRequest = PageRequest.of(
+                request.getPage() - PAGE_SIZE_INDEX,
+                request.getSize(),
+                sort
+        );
+        Page<UserVoucher> userVoucherPage = userVoucherRepository.getAllVoucherByUserId(userId, pageRequest);
+        if (userVoucherPage == null) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "User voucher is not found");
+        }
+        List<UserVoucherResponse> userVoucherResponse = userVoucherMapper.toDTOList(userVoucherPage.getContent());
+        return new PagingResponse<>(userVoucherResponse, request, userVoucherPage.getTotalElements());
+    }
+// cần làm
+    @Override
+    public UserVoucherResponse exchangeVoucher(String voucherId) {
+        Optional<User> user = userRepository.findById(userUtilService.getIdCurrentUser());
+        if (user == null) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, UserConstant.USER_NOT_FOUND);
+        }
+        Voucher voucher = voucherRepository.findById(voucherId).orElseThrow(
+                () -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Voucher not found"));
+        if (userVoucherRepository.existsByUserAndVoucher(user.get(), voucher)) {
+            throw new AppException(MessageCodeConstant.M005_INVALID, "User has already received this voucher");
+        }
+        Point point = pointRepository.findByUserId(user.get().getId());
+        if (point == null) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Point not found for user");
+        }
+        if (point.getCurrentPoints() - voucher.getExchangePoint() < 0) {
+            throw new AppException(MessageCodeConstant.M005_INVALID, "Not enough points to exchange voucher");
+        }
+        point.setCurrentPoints(point.getCurrentPoints() - voucher.getExchangePoint());
+        pointRepository.save(point);
+
+        UserVoucher userVoucher = new UserVoucher();
+        userVoucher.setUser(user.get());
+        userVoucher.setVoucher(voucher);
+        userVoucher.setUsed(false);
+        userVoucherRepository.save(userVoucher);
+        return userVoucherMapper.toDTO(userVoucher);
+
     }
 
 }

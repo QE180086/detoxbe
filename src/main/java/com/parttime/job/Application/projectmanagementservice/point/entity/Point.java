@@ -24,7 +24,4 @@ public class Point {
 
     private int currentPoints;
 
-    @OneToMany
-    @JoinColumn(name = "voucher_id", nullable = false)
-    private List<Voucher> vouchers;
 }

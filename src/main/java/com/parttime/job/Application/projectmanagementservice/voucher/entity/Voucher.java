@@ -21,4 +21,5 @@ public class Voucher extends BaseEntity {
     private double minOrderValue;
     private boolean isActive;
     private String image;
+    private int exchangePoint;
 }

@@ -1,6 +1,6 @@
 package com.parttime.job.Application.projectmanagementservice.cart.service.impl;
 
-import com.parttime.job.Application.common.constant.MessageCodeConstant;
+import  com.parttime.job.Application.common.constant.MessageCodeConstant;
 import com.parttime.job.Application.common.exception.AppException;
 import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
@@ -14,7 +14,6 @@ import com.parttime.job.Application.projectmanagementservice.cart.repository.Car
 import com.parttime.job.Application.projectmanagementservice.cart.request.CartItemRequest;
 import com.parttime.job.Application.projectmanagementservice.cart.request.UpdateCartItemRequest;
 import com.parttime.job.Application.projectmanagementservice.cart.response.CartItemResponse;
-import com.parttime.job.Application.projectmanagementservice.cart.response.CartResponse;
 import com.parttime.job.Application.projectmanagementservice.cart.service.CartItemService;
 import com.parttime.job.Application.projectmanagementservice.product.entity.Product;
 import com.parttime.job.Application.projectmanagementservice.product.repository.ProductRepository;
@@ -34,12 +33,12 @@ import static com.parttime.job.Application.common.constant.GlobalVariable.PAGE_S
 @Service
 @RequiredArgsConstructor
 public class CartItemServiceImpl implements CartItemService {
-    private CartItemRepository cartItemRepository;
-    private CartRepository cartRepository;
-    private ProductRepository productRepository;
-    private CartItemMapper cartItemMapper;
-    private CartMapper cartMapper;
-    private UserUtilService userUtilService;
+    private final CartItemRepository cartItemRepository;
+    private final CartRepository cartRepository;
+    private final ProductRepository productRepository;
+    private final CartItemMapper cartItemMapper;
+    private final CartMapper cartMapper;
+    private final UserUtilService userUtilService;
 
     @Override
     public CartItemResponse addCartItem(CartItemRequest request) {
@@ -47,22 +46,28 @@ public class CartItemServiceImpl implements CartItemService {
         if (user == null) {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "User not authenticated");
         }
-        Cart cart = cartRepository.findByUserIdAndIsActiveTrue(user.getId())
-                .orElseThrow(() -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Cart not found for user"));
+        Optional<Cart> cart = cartRepository.findByUserIdAndIsActiveTrue(user.getId());
+        if (cart.isEmpty()) {
+            Cart newCart = new Cart();
+            newCart.setUser(user);
+            newCart.setActive(true);
+            cartRepository.save(newCart);
+            cart = Optional.of(newCart);
+        }
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Product not found"));
 
-        Optional<CartItem> cartItem = cartItemRepository.findByCartIdAndProductIdAndCartIsActiveTrue(cart.getId(), product.getId());
+        Optional<CartItem> cartItem = cartItemRepository.findByCartIdAndProductIdAndCartIsActiveTrue(cart.get().getId(), product.getId());
         if (cartItem.isEmpty()) {
             CartItem newCartItem = new CartItem();
             newCartItem.setQuantity(1);
             newCartItem.setProduct(product);
-            newCartItem.setCart(cart);
+            newCartItem.setCart(cart.get());
             newCartItem.setUnitPrice(product.getSalePrice());
             cartItemRepository.save(newCartItem);
             return cartItemMapper.toDTO(newCartItem);
         }
-        cartItem.get().setQuantity(cart.getQuantity() + 1);
+        cartItem.get().setQuantity(cartItem.get().getQuantity() + 1);
         cartItemRepository.save(cartItem.get());
         return cartItemMapper.toDTO(cartItem.get());
     }

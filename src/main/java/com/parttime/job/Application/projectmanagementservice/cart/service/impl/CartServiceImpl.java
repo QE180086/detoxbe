@@ -13,6 +13,7 @@ import com.parttime.job.Application.projectmanagementservice.cart.service.CartSe
 import com.parttime.job.Application.projectmanagementservice.usermanagement.entity.User;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.service.UserUtilService;
 import com.parttime.job.Application.projectmanagementservice.voucher.entity.Voucher;
+import com.parttime.job.Application.projectmanagementservice.voucher.repository.UserVoucherRepository;
 import com.parttime.job.Application.projectmanagementservice.voucher.repository.VoucherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,10 +30,11 @@ import static com.parttime.job.Application.common.constant.GlobalVariable.PAGE_S
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
-    private CartRepository cartRepository;
-    private UserUtilService userUtilService;
-    private VoucherRepository voucherRepository;
-    private CartMapper cartMapper;
+    private final CartRepository cartRepository;
+    private final UserUtilService userUtilService;
+    private final VoucherRepository voucherRepository;
+    private final CartMapper cartMapper;
+    private final UserVoucherRepository userVoucherRepository;
 
     @Override
     public CartResponse getOrCreateCartByUserId() {
@@ -91,6 +93,9 @@ public class CartServiceImpl implements CartService {
         }
         if (!voucher.isActive()) {
             throw new AppException(MessageCodeConstant.M026_FAIL, "Voucher is not active");
+        }
+        if (voucher.getExchangePoint() != 0 && !userVoucherRepository.existsByUserAndVoucher(user, voucher)) {
+            throw new AppException(MessageCodeConstant.M026_FAIL, "You don't have this voucher");
         }
         if (voucher.getMinOrderValue() <= cart.getTotalPrice()) {
             if (voucher.isPercentage()) {
