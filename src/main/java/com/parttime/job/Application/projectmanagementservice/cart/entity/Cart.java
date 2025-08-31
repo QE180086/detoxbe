@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Cart  extends BaseEntity{
+public class Cart extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
@@ -32,7 +32,8 @@ public class Cart  extends BaseEntity{
 
     private Double discountedPrice;
 
-    private boolean isActive;
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
 
     @PrePersist
     @PreUpdate

@@ -18,7 +18,7 @@ public class OpenApiConfig {
     private static final String BEARER = "bearer";
     private static final String JWT = "JWT";
 
-    private static final String DEV_SERVER_URLS = "http://localhost:8080";
+    private static final String DEV_SERVER_URLS = "http://localhost:8080;https://dextox-f9ajbedgghgvf7an.malaysiawest-01.azurewebsites.net/";
 
     @Bean
     public OpenAPI customizeOpenAPI() {

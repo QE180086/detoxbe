@@ -11,7 +11,6 @@ import java.util.List;
 public interface PointMapper {
     @Mapping(target ="userId" , source = "point.user.id")
     @Mapping(target = "email", source = "point.user.email")
-    @Mapping(target = "voucherResponses", source = "point.vouchers")
     PointResponse toDTO(Point point);
     List<PointResponse> toListDTO(List<Point> points);
 }

@@ -15,5 +15,6 @@ public class VoucherRequest {
     private double minOrderValue;
     private boolean isActive;
     private String image;
+    private int exchangePoint;
 
 }

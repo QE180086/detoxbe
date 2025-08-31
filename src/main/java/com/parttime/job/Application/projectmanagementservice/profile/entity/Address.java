@@ -15,10 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 public class Address extends BaseEntity {
-    private String street;
-    private String city;
-    private String state;
-    private String country;
+    private String address;
     private boolean isDefault;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id", nullable = false)
