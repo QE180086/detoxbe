@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class SepayWebhookRequest {
-    private String transaction_id;
-    private double amount;
+    private String id;
+    private double transferAmount;
     private String description;
-    private String account_number;
-    private String transaction_time;
+    private String accountNumber;
+    private String transactionDate;
 }

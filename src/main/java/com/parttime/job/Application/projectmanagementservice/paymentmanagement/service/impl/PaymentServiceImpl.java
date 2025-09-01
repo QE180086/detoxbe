@@ -82,26 +82,27 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentResponse handleWebhook(SepayWebhookRequest request) {
         System.out.println("Webhook received: " + request);
-// Set order
-        Orders order = orderRepository.findFirstByUserIdAndOrderStatusOrderByCreatedDateDesc(userUtilService.getIdCurrentUser(), OrderStatus.PENDING)
-                .orElseThrow(() -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Order not found"));
 
-        if (!(order.getTotalAmount() == request.getAmount())) {
+// Set payment
+        Payment payment = paymentRepository.findByContent(extractCode(request.getDescription()));
+        if (payment == null) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Payment not found with content: " + request.getDescription());
+        }
+
+        payment.setStatus(PaymentStatus.COMPLETED);
+        paymentRepository.save(payment);
+        System.out.println("Payment for content " + request.getDescription() + " marked as COMPLETED.");
+
+// Set order
+        Orders order = payment.getOrders();
+
+        if (order.getTotalAmount() < request.getTransferAmount()) {
             throw new AppException(MessageCodeConstant.M005_INVALID, "Amount mismatch for order: " + order.getId());
         }
         order.setOrderStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
 
         System.out.println("Order " + order.getId() + " marked as COMPLETED.");
-// Set payment
-        Optional<Payment> payment = paymentRepository.findByOrderId(order.getId());
-        if (payment.isEmpty()) {
-            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Payment not found for order: " + order.getId());
-        }
-
-        payment.get().setStatus(PaymentStatus.COMPLETED);
-        paymentRepository.save(payment.get());
-        System.out.println("Payment for order " + order.getId() + " marked as COMPLETED.");
 // Set cart
         Optional<Cart> cart = cartRepository.findByUserIdAndIsActiveTrue(userUtilService.getIdCurrentUser());
         cart.get().setActive(false);
@@ -124,7 +125,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (point == null) {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Point not found for user: " + userUtilService.getIdCurrentUser());
         }
-        point.setCurrentPoints((int) (request.getAmount() / 1000 + point.getCurrentPoints()));
+        point.setCurrentPoints((int) (request.getTransferAmount() / 1000 + point.getCurrentPoints()));
         pointRepository.save(point);
         return null;
     }
@@ -186,5 +187,14 @@ public class PaymentServiceImpl implements PaymentService {
             sb.append(CHARACTERS.charAt(index));
         }
         return sb.toString();
+    }
+
+    public static String extractCode(String description) {
+        String prefix = "DC24";
+        int index = description.indexOf(prefix);
+        if (index != -1 && index + 10 <= description.length()) {
+            return description.substring(index, index + 10);
+        }
+        return null;
     }
 }
