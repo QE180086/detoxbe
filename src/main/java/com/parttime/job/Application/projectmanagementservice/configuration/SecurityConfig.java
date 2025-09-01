@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/auth/register", "/api/auth/login", "/api/auth/sendOTP", "/api/auth/verifyOTP", "/auth/verify-email-code",
-            "/api/user/forget-password","/api/user/reset-password","/profiles/create/**", "/api/webhook/payment"
+            "/api/user/forget-password","/api/user/reset-password","/profiles/create/**", "/api/payment/webhook"
     };
 
     private static final String[] GET_PUBLIC_ENDPOINTS = {
@@ -39,7 +39,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-resources/**",
             "/webjars/**",
-            "/api/webhook/payment"
+            "/api/payment/webhook"
     };
 
     @Bean
