@@ -104,30 +104,30 @@ public class PaymentServiceImpl implements PaymentService {
 
         System.out.println("Order " + order.getId() + " marked as COMPLETED.");
 // Set cart
-        Optional<Cart> cart = cartRepository.findByUserIdAndIsActiveTrue(userUtilService.getIdCurrentUser());
+        Optional<Cart> cart = cartRepository.findByUserIdAndIsActiveTrue(order.getUser().getId());
         cart.get().setActive(false);
         cartRepository.save(cart.get());
 
         if (cart.get().getVoucher() != null) {
-            Optional<UserVoucher> userVoucher = userVoucherRepository.findByUserIdAndVoucherId(userUtilService.getIdCurrentUser(), cart.get().getVoucher().getId());
+            Optional<UserVoucher> userVoucher = userVoucherRepository.findByUserIdAndVoucherId(order.getUser().getId(), cart.get().getVoucher().getId());
             if (userVoucher.isPresent()) {
                 userVoucher.get().setUsed(true);
                 userVoucherRepository.save(userVoucher.get());
             }
         }
         Cart newCart = new Cart();
-        newCart.setUser(userUtilService.getCurrentUser());
+        newCart.setUser(cart.get().getUser());
         newCart.setActive(true);
 
         cartRepository.save(newCart);
 // Set point
-        Point point = pointRepository.findByUserId(userUtilService.getIdCurrentUser());
+        Point point = pointRepository.findByUserId(order.getUser().getId());
         if (point == null) {
-            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Point not found for user: " + userUtilService.getIdCurrentUser());
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Point not found for user: " + order.getUser().getId());
         }
         point.setCurrentPoints((int) (request.getTransferAmount() / 1000 + point.getCurrentPoints()));
         pointRepository.save(point);
-        return null;
+        return paymentMapper.toDTO(payment);
     }
 
 
