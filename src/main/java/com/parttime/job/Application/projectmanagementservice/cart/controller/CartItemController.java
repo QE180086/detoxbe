@@ -99,7 +99,7 @@ public class CartItemController {
     }
 
     @DeleteMapping("/all")
-    public ResponseEntity<GenericResponse<Void>> deleteAllItemFromCart(@RequestParam String cartItemId) {
+    public ResponseEntity<GenericResponse<Void>> deleteAllItemFromCart() {
         cartItemService.removeAllItemsFromCart();
         GenericResponse<Void> response = GenericResponse.<Void>builder()
                 .message(MessageDTO.builder()

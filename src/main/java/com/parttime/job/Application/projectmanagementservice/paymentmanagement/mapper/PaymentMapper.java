@@ -4,7 +4,7 @@ import com.parttime.job.Application.projectmanagementservice.paymentmanagement.e
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.PaymentResponse;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {OrderMapper.class})
 public interface PaymentMapper {
     PaymentResponse toDTO(Payment payment);
 }

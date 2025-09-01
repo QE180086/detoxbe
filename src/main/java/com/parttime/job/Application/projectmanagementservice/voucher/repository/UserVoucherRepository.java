@@ -19,6 +19,6 @@ public interface UserVoucherRepository extends JpaRepository<UserVoucher, String
     @Query("SELECT uv FROM UserVoucher uv WHERE uv.user.id = :userId AND uv.voucher.id = :voucherId")
     Optional<UserVoucher> findByUserIdAndVoucherId(@Param("userId") String userId, @Param("voucherId") String voucherId);
 
-    @Query("SELECT uv.voucher FROM UserVoucher uv WHERE uv.user.id = :userId")
+    @Query("SELECT uv FROM UserVoucher uv WHERE uv.user.id = :userId")
     Page<UserVoucher> getAllVoucherByUserId(@Param("userId") String userId, PageRequest pageRequest);
 }

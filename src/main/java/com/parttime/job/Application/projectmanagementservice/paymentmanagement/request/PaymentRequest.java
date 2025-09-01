@@ -6,6 +6,5 @@ import lombok.Data;
 
 @Data
 public class PaymentRequest {
-    @NotBlank(message = "Payment method cannot be blank")
     private PaymentMethod method;
 }

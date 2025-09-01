@@ -13,6 +13,6 @@ public interface CartService {
 
     CartResponse applyVoucherToCart(String voucherCode);
 
-
+    CartResponse removeVoucherFromCart();
 
 }

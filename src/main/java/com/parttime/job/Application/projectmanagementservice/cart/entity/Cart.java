@@ -19,7 +19,6 @@ public class Cart extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
-    private int quantity;
 
     @ManyToOne
     @JoinColumn(name = "voucher_id")
@@ -28,9 +27,10 @@ public class Cart extends BaseEntity {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems;
 
-    private Double totalPrice;
+    private double totalPrice;
+    private double discountedPrice;
 
-    private Double discountedPrice;
+    private boolean appliedVoucher;
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
@@ -41,7 +41,7 @@ public class Cart extends BaseEntity {
         // Tính tổng giá từ tất cả cartItem
         if (cartItems != null && !cartItems.isEmpty()) {
             this.totalPrice = cartItems.stream()
-                    .mapToDouble(item -> item.getTotalPrice() != null ? item.getTotalPrice() : 0.0)
+                    .mapToDouble(CartItem::getTotalPrice)
                     .sum();
         } else {
             this.totalPrice = 0.0;
@@ -60,4 +60,9 @@ public class Cart extends BaseEntity {
             this.discountedPrice = Math.max(0.0, this.totalPrice - discount);
         }
     }
+    @PostLoad
+    public void afterLoad() {
+        calculateTotals();
+    }
 }
+

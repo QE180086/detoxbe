@@ -31,6 +31,7 @@ import com.parttime.job.Application.projectmanagementservice.voucher.repository.
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.security.SecureRandom;
 import java.util.List;
@@ -57,6 +58,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final InformationRepository informationRepository;
 
     @Override
+    @Transactional
     public PaymentResponse createPayment(PaymentRequest paymentRequest) {
         if (!checkOrderPending()) {
             createOrder();
@@ -70,7 +72,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setContent(generateContent());
 
         if (paymentRequest.getMethod() == PaymentMethod.BANK) {
-            vietQRService.generateFixedQRUrl(payment.getContent(), payment.getAmount());
+            payment.setQrCode(vietQRService.generateFixedQRUrl(payment.getContent(), payment.getAmount()));
         }
         paymentRepository.save(payment);
         return paymentMapper.toDTO(payment);
@@ -141,14 +143,14 @@ public class PaymentServiceImpl implements PaymentService {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Cart is empty");
         }
         Optional<Address> address = addressRepository.findDefaultAddressByUserId(userUtilService.getIdCurrentUser());
-        if(address.isEmpty()){
+        if (address.isEmpty()) {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Update address in profile before place order");
         }
         Optional<Profile> profile = profileRepository.findByUserId(userUtilService.getIdCurrentUser());
-        if(profile.isEmpty()){
+        if (profile.isEmpty()) {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Profile not found");
         }
-        if(profile.get().getPhoneNumber().isEmpty()){
+        if (!StringUtils.hasText(profile.get().getPhoneNumber())) {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Update number phone in profile before place order");
         }
         Orders orders = new Orders();

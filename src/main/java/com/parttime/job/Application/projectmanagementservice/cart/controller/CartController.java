@@ -80,4 +80,16 @@ public class CartController {
                 .build();
         return ResponseEntity.ok(response);
     }
+    @PutMapping("/remove-voucher")
+    public ResponseEntity<GenericResponse<CartResponse>> removeVoucherCode() {
+        CartResponse cart = cartService.removeVoucherFromCart();
+        GenericResponse<CartResponse> response = GenericResponse.<CartResponse>builder()
+                .data(cart)
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .build();
+        return ResponseEntity.ok(response);
+    }
 }
