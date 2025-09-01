@@ -23,14 +23,14 @@ public class CartItem extends BaseEntity {
 
     private int quantity;
 
-    private Double unitPrice;
+    private double unitPrice;
 
-    private Double totalPrice;
+    private double totalPrice;
 
     @PrePersist
     @PreUpdate
     public void calculateTotalPrice() {
-        if (unitPrice != null && quantity >= 0) {
+        if (quantity >= 0) {
             this.totalPrice = unitPrice * quantity;
         } else {
             this.totalPrice = 0.0;

@@ -16,5 +16,5 @@ public class PaymentResponse {
 
     private String qrCode;
 
-    private Orders orders;
+
 }

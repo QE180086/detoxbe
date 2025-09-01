@@ -12,7 +12,6 @@ public interface CartItemMapper {
     @Mapping(target = "productId", source = "cartItem.product.id")
     @Mapping(target = "productName", source = "cartItem.product.name")
     @Mapping(target = "productImage", source = "cartItem.product.image")
-    @Mapping(target = "unitPrice", source = "cartItem.product.price")
     CartItemResponse toDTO(CartItem cartItem);
     List<CartItemResponse> toListDTO(List<CartItem> cartItems);
 }

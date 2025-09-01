@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/point")
 @RequiredArgsConstructor
 public class PointController {
-    private PointService pointService;
+    private final PointService pointService;
     @GetMapping
     public ResponseEntity<GenericResponse<PagingResponse<PointResponse>>> getAllPoint(
             @RequestParam(required = false, defaultValue = "1") int page,

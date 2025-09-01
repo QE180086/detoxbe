@@ -6,6 +6,7 @@ import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
 import com.parttime.job.Application.common.utils.PagingUtil;
 import com.parttime.job.Application.projectmanagementservice.cart.entity.Cart;
+import com.parttime.job.Application.projectmanagementservice.cart.mapper.CartItemMapper;
 import com.parttime.job.Application.projectmanagementservice.cart.mapper.CartMapper;
 import com.parttime.job.Application.projectmanagementservice.cart.repository.CartRepository;
 import com.parttime.job.Application.projectmanagementservice.cart.response.CartResponse;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ public class CartServiceImpl implements CartService {
     private final UserUtilService userUtilService;
     private final VoucherRepository voucherRepository;
     private final CartMapper cartMapper;
+    private final CartItemMapper cartItemMapper;
     private final UserVoucherRepository userVoucherRepository;
 
     @Override
@@ -79,6 +82,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
     public CartResponse applyVoucherToCart(String voucherCode) {
         User user = userUtilService.getCurrentUser();
         if (user == null) {
@@ -86,7 +90,9 @@ public class CartServiceImpl implements CartService {
         }
         Cart cart = cartRepository.findByUserIdAndIsActiveTrue(user.getId())
                 .orElseThrow(() -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Cart not found for user"));
-
+        if (cart.getVoucher() != null) {
+            throw new AppException(MessageCodeConstant.M026_FAIL, "Voucher has been applied to cart");
+        }
         Voucher voucher = voucherRepository.findByCode(voucherCode);
         if (voucher == null) {
             throw new AppException(MessageCodeConstant.M026_FAIL, "Invalid voucher code");
@@ -108,8 +114,27 @@ public class CartServiceImpl implements CartService {
                 cart.setDiscountedPrice(discountValue);
             }
             cart.setVoucher(voucher);
+            cart.setAppliedVoucher(true);
             cartRepository.save(cart);
         }
+        return cartMapper.toDTO(cart);
+    }
+
+    @Override
+    public CartResponse removeVoucherFromCart() {
+        User user = userUtilService.getCurrentUser();
+        if (user == null) {
+            throw new AppException(MessageCodeConstant.M006_UNAUTHORIZED, "User not authenticated");
+        }
+        Cart cart = cartRepository.findByUserIdAndIsActiveTrue(user.getId())
+                .orElseThrow(() -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Cart not found for user"));
+
+        if (cart.getVoucher() == null) {
+            throw new AppException(MessageCodeConstant.M026_FAIL, "Voucher has not been applied to cart");
+        }
+        cart.setVoucher(null);
+        cart.setAppliedVoucher(false);
+        cartRepository.save(cart);
         return cartMapper.toDTO(cart);
     }
 

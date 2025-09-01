@@ -26,9 +26,9 @@ import static com.parttime.job.Application.common.constant.GlobalVariable.PAGE_S
 @Service
 @RequiredArgsConstructor
 public class PointServiceImpl implements PointService {
-    private PointRepository pointRepository;
-    private PointMapper pointMapper;
-    private UserUtilService userUtilService;
+    private final PointRepository pointRepository;
+    private final PointMapper pointMapper;
+    private final UserUtilService userUtilService;
 
     @Override
     public PointResponse getPointByUserId() {

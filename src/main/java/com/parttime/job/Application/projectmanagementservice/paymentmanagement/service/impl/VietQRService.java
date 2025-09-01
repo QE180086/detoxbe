@@ -16,7 +16,7 @@ public class VietQRService {
         try {
             String encodedContent = URLEncoder.encode(content, "UTF-8");
             return String.format(
-                    "https://img.vietqr.io/image/%s-%s-compact2.png?amount=%d&addInfo=%s",
+                    "https://img.vietqr.io/image/%s-%s-compact2.png?amount=%f&addInfo=%s",
                     BANK_ID,
                     ACCOUNT_NO,
                     amount,

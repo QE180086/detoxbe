@@ -1,6 +1,6 @@
 package com.parttime.job.Application.projectmanagementservice.cart.service.impl;
 
-import  com.parttime.job.Application.common.constant.MessageCodeConstant;
+import com.parttime.job.Application.common.constant.MessageCodeConstant;
 import com.parttime.job.Application.common.exception.AppException;
 import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
@@ -19,6 +19,7 @@ import com.parttime.job.Application.projectmanagementservice.product.entity.Prod
 import com.parttime.job.Application.projectmanagementservice.product.repository.ProductRepository;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.entity.User;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.service.UserUtilService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,6 +41,7 @@ public class CartItemServiceImpl implements CartItemService {
     private final CartMapper cartMapper;
     private final UserUtilService userUtilService;
 
+    @Transactional
     @Override
     public CartItemResponse addCartItem(CartItemRequest request) {
         User user = userUtilService.getCurrentUser();
@@ -63,12 +65,21 @@ public class CartItemServiceImpl implements CartItemService {
             newCartItem.setQuantity(1);
             newCartItem.setProduct(product);
             newCartItem.setCart(cart.get());
-            newCartItem.setUnitPrice(product.getSalePrice());
+            if (product.getSalePrice() == 0) {
+                newCartItem.setUnitPrice(product.getPrice());
+            } else {
+                newCartItem.setUnitPrice(product.getSalePrice());
+            }
             cartItemRepository.save(newCartItem);
             return cartItemMapper.toDTO(newCartItem);
         }
         cartItem.get().setQuantity(cartItem.get().getQuantity() + 1);
-        cartItemRepository.save(cartItem.get());
+        if (product.getSalePrice() == 0) {
+            cartItem.get().setUnitPrice(product.getPrice());
+        } else {
+            cartItem.get().setUnitPrice(product.getSalePrice());
+        }
+        cartItemRepository.saveAndFlush(cartItem.get());
         return cartItemMapper.toDTO(cartItem.get());
     }
 

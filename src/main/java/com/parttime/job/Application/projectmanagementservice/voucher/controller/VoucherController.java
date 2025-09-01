@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/vouchers")
 @RequiredArgsConstructor
 public class VoucherController {
-    private VoucherService voucherService;
+    private final VoucherService voucherService;
 
     @GetMapping
     public ResponseEntity<GenericResponse<PagingResponse<VoucherResponse>>> getAllVoucher(
