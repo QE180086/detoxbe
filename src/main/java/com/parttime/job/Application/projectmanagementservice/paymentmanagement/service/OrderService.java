@@ -2,6 +2,7 @@ package com.parttime.job.Application.projectmanagementservice.paymentmanagement.
 
 import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.OrderStatus;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderResponse;
 
 public interface OrderService {
@@ -11,4 +12,5 @@ public interface OrderService {
 
     OrderResponse getOrderDetail(String orderId);
 
+    OrderStatus checkOrderStatus(String orderId);
 }

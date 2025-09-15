@@ -2,6 +2,7 @@ package com.parttime.job.Application.projectmanagementservice.voucher.service;
 
 import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
+import com.parttime.job.Application.projectmanagementservice.voucher.request.ExchangeVoucherRequest;
 import com.parttime.job.Application.projectmanagementservice.voucher.request.UserVoucherRequest;
 import com.parttime.job.Application.projectmanagementservice.voucher.request.VoucherRequest;
 import com.parttime.job.Application.projectmanagementservice.voucher.response.UserVoucherResponse;
@@ -24,5 +25,5 @@ public interface VoucherService {
 
     PagingResponse<UserVoucherResponse> getVouchersByUser(String userId, PagingRequest request);
 
-    UserVoucherResponse exchangeVoucher(String voucherId);
+    UserVoucherResponse exchangeVoucher(ExchangeVoucherRequest request);
 }

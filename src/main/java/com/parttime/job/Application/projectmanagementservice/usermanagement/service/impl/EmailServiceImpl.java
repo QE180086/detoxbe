@@ -47,7 +47,7 @@ public class EmailServiceImpl implements EmailService {
         OTPVerification verification = new OTPVerification();
         verification.setEmail(recipient);
         verification.setOtp(otp);
-        verification.setExpiryTime(LocalDateTime.now().plusMinutes(1));
+        verification.setExpiryTime(LocalDateTime.now().plusMinutes(5));
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 

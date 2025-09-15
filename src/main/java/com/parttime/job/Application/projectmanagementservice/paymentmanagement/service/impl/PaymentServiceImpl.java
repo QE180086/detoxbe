@@ -2,6 +2,9 @@ package com.parttime.job.Application.projectmanagementservice.paymentmanagement.
 
 import com.parttime.job.Application.common.constant.MessageCodeConstant;
 import com.parttime.job.Application.common.exception.AppException;
+import com.parttime.job.Application.common.request.PagingRequest;
+import com.parttime.job.Application.common.response.PagingResponse;
+import com.parttime.job.Application.common.utils.PagingUtil;
 import com.parttime.job.Application.projectmanagementservice.cart.entity.Cart;
 import com.parttime.job.Application.projectmanagementservice.cart.repository.CartRepository;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.entity.OrderItem;
@@ -15,27 +18,40 @@ import com.parttime.job.Application.projectmanagementservice.paymentmanagement.r
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.repository.PaymentRepository;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.request.PaymentRequest;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.request.SepayWebhookRequest;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.PaymentResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.service.PaymentService;
 import com.parttime.job.Application.projectmanagementservice.point.entity.Point;
 import com.parttime.job.Application.projectmanagementservice.point.repository.PointRepository;
+import com.parttime.job.Application.projectmanagementservice.product.constant.ProductConstant;
 import com.parttime.job.Application.projectmanagementservice.profile.entity.Address;
 import com.parttime.job.Application.projectmanagementservice.profile.entity.Information;
 import com.parttime.job.Application.projectmanagementservice.profile.entity.Profile;
 import com.parttime.job.Application.projectmanagementservice.profile.repository.AddressRepository;
 import com.parttime.job.Application.projectmanagementservice.profile.repository.InformationRepository;
 import com.parttime.job.Application.projectmanagementservice.profile.repository.ProfileRepository;
+import com.parttime.job.Application.projectmanagementservice.usermanagement.entity.User;
+import com.parttime.job.Application.projectmanagementservice.usermanagement.repository.UserRepository;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.service.UserUtilService;
 import com.parttime.job.Application.projectmanagementservice.voucher.entity.UserVoucher;
 import com.parttime.job.Application.projectmanagementservice.voucher.repository.UserVoucherRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static com.parttime.job.Application.common.constant.GlobalVariable.PAGE_SIZE_INDEX;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +72,8 @@ public class PaymentServiceImpl implements PaymentService {
     private final ProfileRepository profileRepository;
     private final AddressRepository addressRepository;
     private final InformationRepository informationRepository;
+    private final TaskScheduler taskScheduler;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -75,6 +93,18 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setQrCode(vietQRService.generateFixedQRUrl(payment.getContent(), payment.getAmount()));
         }
         paymentRepository.save(payment);
+        if (payment.getMethod() == PaymentMethod.BANK) {
+            taskScheduler.schedule(() -> {
+                Optional<Payment> opt = paymentRepository.findById(payment.getId());
+                if (opt.isPresent()) {
+                    Payment p = opt.get();
+                    if (p.getStatus() == PaymentStatus.PENDING) {
+                        p.setStatus(PaymentStatus.FAILED);
+                        paymentRepository.save(p);
+                    }
+                }
+            }, Date.from(Instant.now().plus(15, ChronoUnit.MINUTES)));
+        }
         return paymentMapper.toDTO(payment);
     }
 
@@ -128,6 +158,65 @@ public class PaymentServiceImpl implements PaymentService {
         point.setCurrentPoints((int) (request.getTransferAmount() / 1000 + point.getCurrentPoints()));
         pointRepository.save(point);
         return paymentMapper.toDTO(payment);
+    }
+
+    @Override
+    public PaymentResponse updateStatusForCashPayment(String paymentId, PaymentStatus paymentStatus) {
+        Optional<Payment> payment = paymentRepository.findById(paymentId);
+        if (payment.isEmpty()) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Payment not found with id: " + paymentId);
+        }
+        if (payment.get().getStatus() != PaymentStatus.PENDING || payment.get().getMethod() != PaymentMethod.CASH) {
+            throw new AppException(MessageCodeConstant.M005_INVALID, "Cannot update status for payment with id: " + paymentId);
+        }
+        payment.get().setStatus(paymentStatus);
+        paymentRepository.save(payment.get());
+        if (paymentStatus == PaymentStatus.COMPLETED) {
+            Orders order = payment.get().getOrders();
+            order.setOrderStatus(OrderStatus.COMPLETED);
+            orderRepository.save(order);
+
+            Optional<Cart> cart = cartRepository.findByUserIdAndIsActiveTrue(order.getUser().getId());
+            cart.get().setActive(false);
+            cartRepository.save(cart.get());
+
+            if (cart.get().getVoucher() != null) {
+                Optional<UserVoucher> userVoucher = userVoucherRepository.findByUserIdAndVoucherId(order.getUser().getId(), cart.get().getVoucher().getId());
+                if (userVoucher.isPresent()) {
+                    userVoucher.get().setUsed(true);
+                    userVoucherRepository.save(userVoucher.get());
+                }
+            }
+            Cart newCart = new Cart();
+            newCart.setUser(cart.get().getUser());
+            newCart.setActive(true);
+
+            cartRepository.save(newCart);
+
+            Point point = pointRepository.findByUserId(order.getUser().getId());
+            if (point == null) {
+                throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Point not found for user: " + order.getUser().getId());
+            }
+            point.setCurrentPoints((int) (payment.get().getAmount() / 1000 + point.getCurrentPoints()));
+            pointRepository.save(point);
+        }
+        return paymentMapper.toDTO(payment.get());
+    }
+// list order
+    @Override
+    public PagingResponse<PaymentResponse> getListPayment(String userId, PagingRequest pagingRequest) {
+        Sort sort = PagingUtil.createSort(pagingRequest);
+        PageRequest pageRequest = PageRequest.of(
+                pagingRequest.getPage() - PAGE_SIZE_INDEX,
+                pagingRequest.getSize(),
+                sort
+        );
+        Page<Payment> paymentPage = paymentRepository.searchAllPayment(userId, pageRequest);
+        if (paymentPage == null) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, ProductConstant.PRODUCT_NOT_FOUND);
+        }
+        List<PaymentResponse> paymentResponse = paymentMapper.toListDTO(paymentPage.getContent());
+        return new PagingResponse<>(paymentResponse, pagingRequest, paymentPage.getTotalElements());
     }
 
 
