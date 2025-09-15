@@ -6,6 +6,7 @@ import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
 import com.parttime.job.Application.common.utils.PagingUtil;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.entity.Orders;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.OrderStatus;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.mapper.OrderMapper;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.repository.OrderRepository;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderResponse;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.parttime.job.Application.common.constant.GlobalVariable.PAGE_SIZE_INDEX;
 
@@ -63,5 +65,15 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getOrderDetail(String orderId) {
         return orderMapper.toDTO(orderRepository.findById(orderId).orElseThrow(() ->
                 new AppException(MessageCodeConstant.M003_NOT_FOUND, "Order not found")));
+    }
+
+    @Override
+    public OrderStatus checkOrderStatus(String orderId) {
+        Optional<Orders> orders = orderRepository.findById(orderId);
+        if (orders.isEmpty()) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Order not found");
+        }
+
+        return orders.get().getOrderStatus();
     }
 }

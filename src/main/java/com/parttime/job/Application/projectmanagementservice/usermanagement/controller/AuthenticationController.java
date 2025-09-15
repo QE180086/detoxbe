@@ -15,11 +15,9 @@ import com.parttime.job.Application.projectmanagementservice.usermanagement.serv
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/auth")
 @RestController
@@ -81,6 +79,32 @@ public class AuthenticationController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/api/auth/success")
+    public ResponseEntity<GenericResponse<AuthResponseLogin>> authSuccess(@RequestParam String token) {
+        AuthResponseLogin authResponseLogin = new AuthResponseLogin();
+        authResponseLogin.setAccessToken(token);
+        GenericResponse<AuthResponseLogin> response = GenericResponse.<AuthResponseLogin>builder()
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .data(authResponseLogin)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 
+    @GetMapping("/api/auth/error")
+    public ResponseEntity<GenericResponse<String>> authError(@RequestParam String message) {
+        GenericResponse<String> response = GenericResponse.<String>builder()
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .data(message)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 
 }

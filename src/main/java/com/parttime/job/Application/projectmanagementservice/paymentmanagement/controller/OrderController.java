@@ -7,6 +7,7 @@ import com.parttime.job.Application.common.dto.MessageDTO;
 import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.request.SortRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.OrderStatus;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.service.OrderService;
 import jakarta.validation.Valid;
@@ -39,6 +40,7 @@ public class OrderController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -63,11 +65,12 @@ public class OrderController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{cartId}")
+    @GetMapping("/{orderId}")
     public ResponseEntity<GenericResponse<OrderResponse>> getOrderByOrderId(@PathVariable String orderId) {
         OrderResponse order = orderService.getOrderDetail(orderId);
         GenericResponse<OrderResponse> response = GenericResponse.<OrderResponse>builder()
@@ -76,6 +79,19 @@ public class OrderController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/status")
+    public ResponseEntity<GenericResponse<OrderStatus>> checkStatusOrder(@RequestParam String orderId) {
+        GenericResponse<OrderStatus> response = GenericResponse.<OrderStatus>builder()
+                .data(orderService.checkOrderStatus(orderId))
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }

@@ -17,6 +17,7 @@ import com.parttime.job.Application.projectmanagementservice.voucher.mapper.User
 import com.parttime.job.Application.projectmanagementservice.voucher.mapper.VoucherMapper;
 import com.parttime.job.Application.projectmanagementservice.voucher.repository.UserVoucherRepository;
 import com.parttime.job.Application.projectmanagementservice.voucher.repository.VoucherRepository;
+import com.parttime.job.Application.projectmanagementservice.voucher.request.ExchangeVoucherRequest;
 import com.parttime.job.Application.projectmanagementservice.voucher.request.UserVoucherRequest;
 import com.parttime.job.Application.projectmanagementservice.voucher.request.VoucherRequest;
 import com.parttime.job.Application.projectmanagementservice.voucher.response.UserVoucherResponse;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,6 +39,9 @@ import static com.parttime.job.Application.common.constant.GlobalVariable.PAGE_S
 @Service
 @RequiredArgsConstructor
 public class VoucherServiceImpl implements VoucherService {
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final SecureRandom random = new SecureRandom();
+
     private final UserVoucherRepository userVoucherRepository;
     private final UserRepository userRepository;
     private final VoucherRepository voucherRepository;
@@ -174,18 +179,28 @@ public class VoucherServiceImpl implements VoucherService {
         List<UserVoucherResponse> userVoucherResponse = userVoucherMapper.toDTOList(userVoucherPage.getContent());
         return new PagingResponse<>(userVoucherResponse, request, userVoucherPage.getTotalElements());
     }
-// cần làm
+
     @Override
-    public UserVoucherResponse exchangeVoucher(String voucherId) {
+    public UserVoucherResponse exchangeVoucher(ExchangeVoucherRequest request) {
         Optional<User> user = userRepository.findById(userUtilService.getIdCurrentUser());
         if (user == null) {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, UserConstant.USER_NOT_FOUND);
         }
-        Voucher voucher = voucherRepository.findById(voucherId).orElseThrow(
-                () -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Voucher not found"));
-        if (userVoucherRepository.existsByUserAndVoucher(user.get(), voucher)) {
-            throw new AppException(MessageCodeConstant.M005_INVALID, "User has already received this voucher");
+
+        Voucher voucher = new Voucher();
+        voucher.setCode(generateRandomCode(6));
+        voucher.setPercentage(request.isPercentage());
+        voucher.setDiscountValue(request.getDiscountValue());
+        voucher.setMinOrderValue(request.getMinOrderValue());
+        voucher.setActive(request.isActive());
+        voucher.setImage(request.getImage());
+        voucher.setExchangePoint(request.getExchangePoint());
+
+        if (voucherRepository.existsByCode(voucher.getCode())) {
+            throw new AppException(MessageCodeConstant.M004_DUPLICATE, "Voucher code already exists");
         }
+        voucherRepository.save(voucher);
+
         Point point = pointRepository.findByUserId(user.get().getId());
         if (point == null) {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Point not found for user");
@@ -205,4 +220,12 @@ public class VoucherServiceImpl implements VoucherService {
 
     }
 
+    public static String generateRandomCode(int length) {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            sb.append(CHARACTERS.charAt(index));
+        }
+        return sb.toString();
+    }
 }
