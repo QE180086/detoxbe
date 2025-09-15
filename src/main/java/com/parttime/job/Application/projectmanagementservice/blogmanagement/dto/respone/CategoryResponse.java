@@ -10,7 +10,7 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryResponse {
     String id;
-    Date createdAt;
+    Date createdDate;
     String name;
     Boolean isActive;
 }

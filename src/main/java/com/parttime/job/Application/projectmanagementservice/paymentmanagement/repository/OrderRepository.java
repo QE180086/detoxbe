@@ -27,11 +27,6 @@ public interface OrderRepository extends JpaRepository<Orders, String> {
             "WHERE o.user.id = :userId AND o.orderStatus = 'PENDING'")
     boolean existsPendingOrderByUserId(@Param("userId") String userId);
 
-//    @Query("SELECT o FROM Orders o " +
-//            "WHERE o.user.id = :userId AND o.orderStatus = 'PENDING' " +
-//            "ORDER BY o.createdAt DESC")
-//    Optional<Orders> findLatestPendingOrderByUserId(@Param("userId") String userId);
-
     Optional<Orders> findFirstByUserIdAndOrderStatusOrderByCreatedDateDesc(String userId, OrderStatus orderStatus);
 
 

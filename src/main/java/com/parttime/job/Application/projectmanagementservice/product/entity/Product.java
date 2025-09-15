@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -26,4 +28,8 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "type_product_id")
     TypeProduct typeProduct;
     boolean isActive;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Rate> rates = new ArrayList<>();
+
 }

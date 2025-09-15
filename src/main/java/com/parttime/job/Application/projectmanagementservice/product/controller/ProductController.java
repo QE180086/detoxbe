@@ -101,7 +101,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<GenericResponse<Void>> deleteProduct(@PathVariable("id") String productId) {
         productService.delete(productId);
         GenericResponse<Void> response = GenericResponse.<Void>builder()

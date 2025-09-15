@@ -14,7 +14,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentResponse {
     String id;
-    Date createdAt;
+    Date createdDate;
     int emojis;
     String content;
     int level;
