@@ -14,7 +14,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BlogResponse {
     String id;
-    Date createdAt;
+    Date createdDate;
     String title;
     String content;
     String image;

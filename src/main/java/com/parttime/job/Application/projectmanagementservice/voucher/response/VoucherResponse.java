@@ -12,7 +12,7 @@ public class VoucherResponse {
     private boolean isPercentage;
     private double minOrderValue;
     private boolean isActive;
-    private Date createdAt;
+    private Date createdDate;
     private String image;
     private int exchangePoint;
 
