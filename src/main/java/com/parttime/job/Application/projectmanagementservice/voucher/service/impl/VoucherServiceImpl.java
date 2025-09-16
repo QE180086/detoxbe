@@ -172,7 +172,12 @@ public class VoucherServiceImpl implements VoucherService {
                 request.getSize(),
                 sort
         );
-        Page<UserVoucher> userVoucherPage = userVoucherRepository.getAllVoucherByUserId(userId, pageRequest);
+        Page<UserVoucher> userVoucherPage;
+        if (userId == null) {
+            userVoucherPage = userVoucherRepository.findAll(pageRequest);
+        } else {
+            userVoucherPage = userVoucherRepository.getAllVoucherByUserId(userId, pageRequest);
+        }
         if (userVoucherPage == null) {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "User voucher is not found");
         }

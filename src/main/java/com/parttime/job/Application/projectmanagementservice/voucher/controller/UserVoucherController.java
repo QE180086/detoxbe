@@ -7,6 +7,7 @@ import com.parttime.job.Application.common.dto.MessageDTO;
 import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.request.SortRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
+import com.parttime.job.Application.projectmanagementservice.voucher.request.ExchangeVoucherRequest;
 import com.parttime.job.Application.projectmanagementservice.voucher.request.UserVoucherRequest;
 import com.parttime.job.Application.projectmanagementservice.voucher.request.VoucherRequest;
 import com.parttime.job.Application.projectmanagementservice.voucher.response.UserVoucherResponse;
@@ -34,7 +35,6 @@ public class UserVoucherController {
 
         PagingRequest pagingRequest = new PagingRequest(page, size,
                 new SortRequest(direction, field));
-
         PagingResponse<UserVoucherResponse> vouchers = voucherService.getVouchersByUser(userId, pagingRequest);
         GenericResponse<PagingResponse<UserVoucherResponse>> response = GenericResponse.<PagingResponse<UserVoucherResponse>>builder()
                 .data(vouchers)
@@ -51,6 +51,19 @@ public class UserVoucherController {
     @PostMapping
     public ResponseEntity<GenericResponse<UserVoucherResponse>> receiveVoucher(@Valid @RequestBody UserVoucherRequest request) {
         UserVoucherResponse voucher = voucherService.userReceiveVoucher(request);
+        GenericResponse<UserVoucherResponse> response = GenericResponse.<UserVoucherResponse>builder()
+                .data(voucher)
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/exchange")
+    public ResponseEntity<GenericResponse<UserVoucherResponse>> exchangeVoucher(@Valid @RequestBody ExchangeVoucherRequest request) {
+        UserVoucherResponse voucher = voucherService.exchangeVoucher(request);
         GenericResponse<UserVoucherResponse> response = GenericResponse.<UserVoucherResponse>builder()
                 .data(voucher)
                 .message(MessageDTO.builder()
