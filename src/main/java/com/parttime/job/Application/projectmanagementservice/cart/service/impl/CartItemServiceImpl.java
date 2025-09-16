@@ -129,10 +129,18 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
+    @Transactional
     public void removeCartItem(String cartItemId) {
+        User user = userUtilService.getCurrentUser();
+        if (user == null) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "User not authenticated");
+        }
+        Cart cart = cartRepository.findByUserIdAndIsActiveTrue(user.getId())
+                .orElseThrow(() -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Cart not found for user"));
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Cart item not found"));
 
+        cart.getCartItems().remove(cartItem);
         cartItemRepository.delete(cartItem);
     }
 

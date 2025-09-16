@@ -86,7 +86,7 @@ public class CartItemController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{cartItemId}")
     public ResponseEntity<GenericResponse<Void>> deleteItemFromCart(@RequestParam String cartItemId) {
        cartItemService.removeCartItem(cartItemId);
         GenericResponse<Void> response = GenericResponse.<Void>builder()

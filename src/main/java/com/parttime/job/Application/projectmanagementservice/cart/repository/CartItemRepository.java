@@ -1,6 +1,5 @@
 package com.parttime.job.Application.projectmanagementservice.cart.repository;
 
-import com.parttime.job.Application.projectmanagementservice.cart.entity.Cart;
 import com.parttime.job.Application.projectmanagementservice.cart.entity.CartItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
