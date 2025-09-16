@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -145,6 +146,7 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
+    @Transactional
     public void removeAllItemsFromCart() {
         User user = userUtilService.getCurrentUser();
         if (user == null) {
@@ -153,6 +155,7 @@ public class CartItemServiceImpl implements CartItemService {
         Cart cart = cartRepository.findByUserIdAndIsActiveTrue(user.getId())
                 .orElseThrow(() -> new AppException(MessageCodeConstant.M003_NOT_FOUND, "Cart not found for user"));
 
-        cartItemRepository.deleteAllByCart_Id(cart.getId());
+        cart.getCartItems().clear();
+        cartItemRepository.deleteAllByCart(cart);
     }
 }

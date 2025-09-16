@@ -40,6 +40,7 @@ public class CartItemController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
 
@@ -55,6 +56,7 @@ public class CartItemController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
 
@@ -69,6 +71,7 @@ public class CartItemController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -82,6 +85,7 @@ public class CartItemController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -94,6 +98,7 @@ public class CartItemController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.DELETE_DATA_SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -106,6 +111,7 @@ public class CartItemController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.DELETE_DATA_SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }

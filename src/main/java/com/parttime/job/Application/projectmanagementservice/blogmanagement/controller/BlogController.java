@@ -57,6 +57,7 @@ public class BlogController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
 
@@ -72,6 +73,7 @@ public class BlogController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
 
@@ -104,6 +106,7 @@ public class BlogController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
 
@@ -133,6 +136,7 @@ public class BlogController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -147,6 +151,7 @@ public class BlogController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
 
@@ -166,6 +171,7 @@ public class BlogController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -179,6 +185,7 @@ public class BlogController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
 
@@ -194,6 +201,7 @@ public class BlogController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
 
@@ -215,6 +223,7 @@ public class BlogController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -229,6 +238,7 @@ public class BlogController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
                         .build())
+                .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);
     }

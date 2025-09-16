@@ -1,5 +1,6 @@
 package com.parttime.job.Application.projectmanagementservice.cart.repository;
 
+import com.parttime.job.Application.projectmanagementservice.cart.entity.Cart;
 import com.parttime.job.Application.projectmanagementservice.cart.entity.CartItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +24,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, String> {
             @Param("productId") String productId
     );
 
-    void deleteAllByCart_Id(String cartId);
+    void deleteAllByCart(Cart cart);
 
     @Query("""
                 SELECT ci FROM CartItem ci
