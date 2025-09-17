@@ -7,9 +7,12 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {OrderItemMapper.class})
 
 public interface OrderMapper {
+    @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "user.email", target = "email")
+    @Mapping(source = "orderItems", target = "orderItems")
     OrderResponse toDTO(Orders orders);
     List<OrderResponse> toListDTO(List<Orders> orders);
 }
