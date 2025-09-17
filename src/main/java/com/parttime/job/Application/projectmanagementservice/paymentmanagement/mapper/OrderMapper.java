@@ -13,6 +13,7 @@ public interface OrderMapper {
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "user.email", target = "email")
     @Mapping(source = "orderItems", target = "orderItems")
+    @Mapping(source = "orderStatus", target = "status")
     OrderResponse toDTO(Orders orders);
     List<OrderResponse> toListDTO(List<Orders> orders);
 }

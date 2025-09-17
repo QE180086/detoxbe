@@ -1,9 +1,6 @@
 package com.parttime.job.Application.projectmanagementservice.paymentmanagement.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.parttime.job.Application.projectmanagementservice.paymentmanagement.entity.OrderItem;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.OrderStatus;
-import com.parttime.job.Application.projectmanagementservice.usermanagement.entity.User;
 import lombok.Data;
 
 import java.util.List;
