@@ -14,6 +14,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         System.out.println("da vao  fail ");
-        response.sendRedirect("/api/auth/error?message=" + exception.getMessage());
+        response.sendRedirect("https://www.detoxcare.site/api/auth/error?message=" + exception.getMessage());
     }
 }

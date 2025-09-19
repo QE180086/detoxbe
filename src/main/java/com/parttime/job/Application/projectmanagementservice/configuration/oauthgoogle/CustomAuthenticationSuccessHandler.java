@@ -111,7 +111,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 //
 //        ObjectMapper mapper = new ObjectMapper();
 //        response.getWriter().write(mapper.writeValueAsString(apiResponse));
-        response.sendRedirect("http://localhost:3000/login/success?token=" + token);
+        response.sendRedirect("https://wwww.detoxcare.site/login/success?token=" + token);
 
     }
 
