@@ -32,7 +32,8 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/auth/register", "/api/auth/login", "/api/auth/sendOTP", "/api/auth/verifyOTP", "/auth/verify-email-code",
-            "/api/user/forget-password","/api/user/reset-password", "/api/payment/webhook","/api/gemini/**","/login/oauth2/**"
+            "/api/user/forget-password","/api/user/reset-password", "/api/payment/webhook","/api/gemini/**","/login/oauth2/**",
+            "/oauth2/authorization/google"
     };
 
     private static final String[] GET_PUBLIC_ENDPOINTS = {

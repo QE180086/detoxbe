@@ -25,7 +25,7 @@ public class AISupportServiceImpl implements AISupportService {
 
     private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
     private static final String DEFAULT_GEMINI_MODEL = "gemini-2.0-flash";
-    private final String BASE_PRODUCT_URL = "http://localhost:3000/product/";
+    private final String BASE_PRODUCT_URL = "https://www.detoxcare.site/product/";
 
     public void refreshDetoxCache() {
         this.detoxProductsCache = productRepository.findAll();
@@ -56,7 +56,7 @@ public class AISupportServiceImpl implements AISupportService {
                         .append(")\n");
             }
 
-           prompt = "Bạn là chuyên gia tư vấn sản phẩm.\n"
+           prompt = "Bạn là chuyên gia tư vấn sản phẩm của web detoxcare https://www.detoxcare.site .\n"
                     + "Dưới đây là các sản phẩm Detox:\n"
                     + contentBuilder
                     + "\nDựa trên danh sách trên, hãy trả lời câu hỏi sau bằng cách:\n"
@@ -66,7 +66,7 @@ public class AISupportServiceImpl implements AISupportService {
                     + "Câu hỏi: " + answerRequest.getQuestion()
                     + "\n\nTrả lời:";
         } else {
-            prompt = "Hãy trả lời câu hỏi. \n\n"
+            prompt = "Bạn là chuyên gia tư vấn sản phẩm của web detoxcare https://www.detoxcare.site .Hãy trả lời câu hỏi. \n\n"
                     + "\n\nCâu hỏi: "
                     + answerRequest.getQuestion()
                     + "\n\nTrả lời:";
@@ -95,7 +95,7 @@ public class AISupportServiceImpl implements AISupportService {
 
 
     private boolean isDetoxRelatedQuestion(String question) {
-        String classifyPrompt = "Câu hỏi sau có liên quan đến sản phẩm Detox, thanh lọc cơ thể, giải độc không? "
+        String classifyPrompt = "Câu hỏi sau có liên quan đến sản phẩm Detox, thanh lọc cơ thể, giải độc không,...? "
                 + "Hãy trả lời 'Có' hoặc 'Không'.\n\nCâu hỏi: " + question;
 
         GeminiRequest.Part part = new GeminiRequest.Part(classifyPrompt);
