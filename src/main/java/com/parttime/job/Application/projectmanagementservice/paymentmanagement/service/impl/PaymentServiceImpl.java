@@ -78,15 +78,22 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public PaymentResponse createPayment(PaymentRequest paymentRequest) {
-        if (!checkOrderPending()) {
-            createOrder();
+        Optional<Orders> order = orderRepository.findFirstByUserIdAndOrderStatusOrderByCreatedDateDesc(userUtilService.getIdCurrentUser(), OrderStatus.PENDING);
+
+        if (order.isPresent()) {
+            order.get().setOrderStatus(OrderStatus.CANCELLED);
+            orderRepository.save(order.get());
+            Optional<Payment> payment = paymentRepository.findByOrderId(order.get().getId());
+            payment.get().setStatus(PaymentStatus.FAILED);
+            paymentRepository.save(payment.get());
         }
-        Optional<Orders> orders = orderRepository.findFirstByUserIdAndOrderStatusOrderByCreatedDateDesc(userUtilService.getIdCurrentUser(), OrderStatus.PENDING);
+        Orders orders = createOrder();
+
         Payment payment = new Payment();
-        payment.setAmount(orders.get().getTotalAmount());
+        payment.setAmount(orders.getTotalAmount());
         payment.setMethod(paymentRequest.getMethod());
         payment.setStatus(PaymentStatus.PENDING);
-        payment.setOrders(orders.get());
+        payment.setOrders(orders);
         payment.setContent(generateContent());
 
         if (paymentRequest.getMethod() == PaymentMethod.BANK) {
@@ -101,6 +108,10 @@ public class PaymentServiceImpl implements PaymentService {
                     if (p.getStatus() == PaymentStatus.PENDING) {
                         p.setStatus(PaymentStatus.FAILED);
                         paymentRepository.save(p);
+                        Orders o = p.getOrders();
+                        o.setOrderStatus(OrderStatus.CANCELLED);
+                        orderRepository.save(o);
+                        System.out.println("Payment with id " + p.getId() + " has been marked as FAILED due to timeout.");
                     }
                 }
             }, Date.from(Instant.now().plus(15, ChronoUnit.MINUTES)));
@@ -202,7 +213,8 @@ public class PaymentServiceImpl implements PaymentService {
         }
         return paymentMapper.toDTO(payment.get());
     }
-// list order
+
+    // list order
     @Override
     public PagingResponse<PaymentResponse> getListPayment(String userId, PagingRequest pagingRequest) {
         Sort sort = PagingUtil.createSort(pagingRequest);
