@@ -3,6 +3,7 @@ package com.parttime.job.Application.projectmanagementservice.paymentmanagement.
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.OrderStatus;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,4 +16,5 @@ public class OrderResponse {
     private List<OrderItemResponse> orderItems;
     private String address;
     private String numberPhone;
+    private LocalDateTime createdDate;
 }
