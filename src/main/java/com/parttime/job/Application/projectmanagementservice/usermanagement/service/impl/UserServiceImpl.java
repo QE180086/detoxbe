@@ -170,4 +170,13 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.delete(user.get());
     }
+
+    @Override
+    public UserResponse getMe() {
+        User user = userUtilService.getCurrentUser();
+        if(user==null){
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, UserConstant.USER_NOT_FOUND);
+        }
+        return userMapper.toUserDTO(user);
+    }
 }

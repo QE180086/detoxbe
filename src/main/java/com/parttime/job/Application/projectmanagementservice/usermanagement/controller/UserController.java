@@ -156,4 +156,18 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/getme")
+    public ResponseEntity<GenericResponse<UserResponse>> getMe() {
+        GenericResponse<UserResponse> response = GenericResponse.<UserResponse>builder()
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .data(userService.getMe())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+
 }

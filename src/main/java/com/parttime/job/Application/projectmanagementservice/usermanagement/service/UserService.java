@@ -28,4 +28,6 @@ public interface UserService {
 
     void deleteUser(String userId);
 
+    UserResponse getMe();
+
 }
