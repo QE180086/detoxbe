@@ -2,6 +2,8 @@ package com.parttime.job.Application.projectmanagementservice.usermanagement.ser
 
 import com.parttime.job.Application.common.constant.MessageCodeConstant;
 import com.parttime.job.Application.common.exception.AppException;
+import com.parttime.job.Application.projectmanagementservice.cart.entity.Cart;
+import com.parttime.job.Application.projectmanagementservice.cart.repository.CartRepository;
 import com.parttime.job.Application.projectmanagementservice.configuration.jwt.JwtUtil;
 import com.parttime.job.Application.projectmanagementservice.point.entity.Point;
 import com.parttime.job.Application.projectmanagementservice.point.repository.PointRepository;
@@ -53,6 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final ProfileRepository profileRepository;
     private final ProfileService profileService;
     private final PointRepository pointRepository;
+    private final CartRepository cartRepository;
 
     @Bean
     public AuthenticationManager authenticationManager() {
@@ -122,6 +125,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         point.setCurrentPoints(0);
         point.setUser(u);
         pointRepository.save(point);
+
+        // Create Cart
+        Cart cart = new Cart();
+        cart.setUser(u);
+        cart.setActive(true);
+        cartRepository.save(cart);
+
         return userMapper.toUserDTO(u);
     }
 }

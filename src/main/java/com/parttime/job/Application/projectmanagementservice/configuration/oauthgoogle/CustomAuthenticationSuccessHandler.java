@@ -5,6 +5,8 @@ import com.parttime.job.Application.common.constant.MessageCodeConstant;
 import com.parttime.job.Application.common.dto.GenericResponse;
 import com.parttime.job.Application.common.dto.MessageDTO;
 import com.parttime.job.Application.common.exception.AppException;
+import com.parttime.job.Application.projectmanagementservice.cart.entity.Cart;
+import com.parttime.job.Application.projectmanagementservice.cart.repository.CartRepository;
 import com.parttime.job.Application.projectmanagementservice.configuration.jwt.JwtUtil;
 import com.parttime.job.Application.projectmanagementservice.point.entity.Point;
 import com.parttime.job.Application.projectmanagementservice.point.repository.PointRepository;
@@ -20,7 +22,9 @@ import com.parttime.job.Application.projectmanagementservice.usermanagement.repo
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,6 +53,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     private final PointRepository pointRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CartRepository cartRepository;
 
     public CustomAuthenticationSuccessHandler(JwtUtil jwtUtil,
                                               UserDetailsService userDetailsService,
@@ -56,7 +61,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                                               ProfileRepository profileRepository,
                                               PointRepository pointRepository,
                                               RoleRepository roleRepository,
-                                              PasswordEncoder passwordEncoder) {
+                                              PasswordEncoder passwordEncoder,
+                                              CartRepository cartRepository) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
@@ -64,6 +70,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         this.pointRepository = pointRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.cartRepository = cartRepository;
     }
 
     @Override
@@ -88,11 +95,21 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             point.setCurrentPoints(0);
             pointRepository.save(point);
         }
+        Cart cart = cartRepository.findByUserId(user.getId());
+        if (cart == null) {
+            cart = new Cart();
+            cart.setUser(managedUser);
+            cart.setActive(true);
+            cartRepository.save(cart);
+        }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
         String token = jwtUtil.generateToken(userDetails);
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
+        SecurityContextHolder.getContext().setAuthentication(authToken);
 //        Map<String, Object> data = new HashMap<>();
 //        data.put("accessToken", token);
 //        data.put("userId", user.getId());
@@ -111,8 +128,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 //
 //        ObjectMapper mapper = new ObjectMapper();
 //        response.getWriter().write(mapper.writeValueAsString(apiResponse));
-//        response.sendRedirect("https://www.detoxcare.site/login/success?token=" + token);
-        response.sendRedirect("http://localhost:3000/login/success?token=" + token);
+        response.sendRedirect("https://www.detoxcare.site/login/success?token=" + token);
+//        response.sendRedirect("http://localhost:3000/login/success?token=" + token);
 
     }
 
