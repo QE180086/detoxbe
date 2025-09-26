@@ -10,7 +10,7 @@ import java.net.URLEncoder;
 @Service
 public class VietQRService {
     private static final String BANK_ID = "970422";
-    private static final String ACCOUNT_NO ="0356645624";
+    private static final String ACCOUNT_NO ="0379560889";
 
     public String generateFixedQRUrl(String content, double amount) {
         try {
