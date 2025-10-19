@@ -4,6 +4,8 @@ import com.parttime.job.Application.projectmanagementservice.paymentmanagement.e
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.PaymentStatus;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class PaymentResponse {
 
@@ -17,5 +19,12 @@ public class PaymentResponse {
 
     private String ordersId;
 
+    private double shippingFee;
+
+    private double amountNotFee;
+
+    private String orderCode;
+
+    private LocalDateTime expectedDeliveryTime;
 
 }

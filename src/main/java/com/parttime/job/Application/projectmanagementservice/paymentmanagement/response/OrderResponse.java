@@ -17,4 +17,7 @@ public class OrderResponse {
     private String address;
     private String numberPhone;
     private LocalDateTime createdDate;
+    private String orderCode;
+    private LocalDateTime expectedDeliveryTime;
+
 }
