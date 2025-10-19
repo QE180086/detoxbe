@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -29,4 +30,10 @@ public class Orders extends BaseEntity {
     private String address;
 
     private String numberPhone;
+
+    private double shippingFee;
+
+    private String orderCode;
+
+    private LocalDateTime expectedDeliveryTime;
 }

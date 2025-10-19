@@ -30,6 +30,9 @@ import com.parttime.job.Application.projectmanagementservice.profile.entity.Prof
 import com.parttime.job.Application.projectmanagementservice.profile.repository.AddressRepository;
 import com.parttime.job.Application.projectmanagementservice.profile.repository.InformationRepository;
 import com.parttime.job.Application.projectmanagementservice.profile.repository.ProfileRepository;
+import com.parttime.job.Application.projectmanagementservice.shippingmanagement.response.AddressInfo;
+import com.parttime.job.Application.projectmanagementservice.shippingmanagement.service.ChangeAddressInfo;
+import com.parttime.job.Application.projectmanagementservice.shippingmanagement.service.GHNService;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.entity.User;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.repository.UserRepository;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.service.UserUtilService;
@@ -74,6 +77,8 @@ public class PaymentServiceImpl implements PaymentService {
     private final InformationRepository informationRepository;
     private final TaskScheduler taskScheduler;
     private final UserRepository userRepository;
+    private final GHNService ghnService;
+    private final ChangeAddressInfo changeAddressInfo;
 
     @Override
     @Transactional
@@ -90,7 +95,7 @@ public class PaymentServiceImpl implements PaymentService {
         Orders orders = createOrder();
 
         Payment payment = new Payment();
-        payment.setAmount(orders.getTotalAmount());
+        payment.setAmount(orders.getTotalAmount() + orders.getShippingFee());
         payment.setMethod(paymentRequest.getMethod());
         payment.setStatus(PaymentStatus.PENDING);
         payment.setOrders(orders);
@@ -116,7 +121,17 @@ public class PaymentServiceImpl implements PaymentService {
                 }
             }, Date.from(Instant.now().plus(15, ChronoUnit.MINUTES)));
         }
-        return paymentMapper.toDTO(payment);
+
+        PaymentResponse response = paymentMapper.toDTO(payment);
+        response.setShippingFee(orders.getShippingFee());
+        response.setAmountNotFee(orders.getTotalAmount());
+        response.setOrderCode(orders.getOrderCode());
+
+        // Call ghn for CASH
+        if (paymentRequest.getMethod() == PaymentMethod.CASH) {
+            ghnService.createShippingOrder(payment);
+        }
+        return response;
     }
 
     @Override
@@ -168,6 +183,9 @@ public class PaymentServiceImpl implements PaymentService {
         }
         point.setCurrentPoints((int) (request.getTransferAmount() / 1000 + point.getCurrentPoints()));
         pointRepository.save(point);
+
+// Call shipping
+        ghnService.createShippingOrder(payment);
         return paymentMapper.toDTO(payment);
     }
 
@@ -255,6 +273,12 @@ public class PaymentServiceImpl implements PaymentService {
         if (!StringUtils.hasText(profile.get().getPhoneNumber())) {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Update number phone in profile before place order");
         }
+        // Shipping fee
+        AddressInfo addressInfo = changeAddressInfo.resolveAddress(address.get().getAddress());
+        if (addressInfo == null) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "AddressInfo not found");
+        }
+
         Orders orders = new Orders();
         orders.setUser(userUtilService.getCurrentUser());
         orders.setOrderStatus(OrderStatus.PENDING);
@@ -262,6 +286,10 @@ public class PaymentServiceImpl implements PaymentService {
         orders.setOrderItems(createListOrderItem(orders));
         orders.setAddress(address.get().getAddress());
         orders.setNumberPhone(profile.get().getPhoneNumber());
+
+        // Shipping fee
+        double shippingFee = ghnService.calculateShippingFee(addressInfo.getDistrictId(), addressInfo.getWardCode(), orders.getOrderItems().size() * 348);
+        orders.setShippingFee(shippingFee);
         return orderRepository.save(orders);
     }
 

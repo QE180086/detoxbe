@@ -5,10 +5,12 @@ import com.parttime.job.Application.projectmanagementservice.paymentmanagement.e
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -28,6 +30,14 @@ public interface OrderRepository extends JpaRepository<Orders, String> {
     boolean existsPendingOrderByUserId(@Param("userId") String userId);
 
     Optional<Orders> findFirstByUserIdAndOrderStatusOrderByCreatedDateDesc(String userId, OrderStatus orderStatus);
+
+
+    // Save manual
+    @Modifying
+    @Query("UPDATE Orders o SET o.orderCode = :orderCode, o.expectedDeliveryTime = :expectedDeliveryTime WHERE o.id = :id")
+    void updateOrderCodeAndTime(@Param("id") String id,
+                                @Param("orderCode") String orderCode,
+                                @Param("expectedDeliveryTime") LocalDateTime expectedDeliveryTime);
 
 
 }

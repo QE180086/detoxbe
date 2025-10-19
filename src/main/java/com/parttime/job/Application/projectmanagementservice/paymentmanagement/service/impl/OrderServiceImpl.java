@@ -28,7 +28,6 @@ import static com.parttime.job.Application.common.constant.GlobalVariable.PAGE_S
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
-
     @Override
     public PagingResponse<OrderResponse> getListOrder(String searchText, PagingRequest pagingRequest) {
         Sort sort = PagingUtil.createSort(pagingRequest);
@@ -76,4 +75,5 @@ public class OrderServiceImpl implements OrderService {
 
         return orders.get().getOrderStatus();
     }
+
 }
