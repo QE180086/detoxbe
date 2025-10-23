@@ -30,10 +30,12 @@ public class AISupportServiceImpl implements AISupportService {
     public void refreshDetoxCache() {
         this.detoxProductsCache = productRepository.findAll();
     }
+
     private List<Product> detoxProductsCache = new ArrayList<>();
 
     @Value("${gemini.api.key}")
     private String apiKey;
+
     @Override
     public String answerFromGemini(AnswerRequest answerRequest) {
         String prompt;
@@ -56,12 +58,13 @@ public class AISupportServiceImpl implements AISupportService {
                         .append(")\n");
             }
 
-           prompt = "Bạn là chuyên gia tư vấn sản phẩm của web detoxcare https://www.detoxcare.site .\n"
+            prompt = "Bạn là chuyên gia tư vấn sản phẩm của web detoxcare https://www.detoxcare.site .\n"
                     + "Dưới đây là các sản phẩm Detox:\n"
                     + contentBuilder
                     + "\nDựa trên danh sách trên, hãy trả lời câu hỏi sau bằng cách:\n"
                     + "- Chọn 1 sản phẩm phù hợp nhất.\n"
                     + "- Giải thích lý do lựa chọn.\n"
+                    + "- Gợi ý giá dựa trên danh sách sản phẩm đó.\n"
                     + "- Đưa link đến sản phẩm.\n\n"
                     + "Câu hỏi: " + answerRequest.getQuestion()
                     + "\n\nTrả lời:";
