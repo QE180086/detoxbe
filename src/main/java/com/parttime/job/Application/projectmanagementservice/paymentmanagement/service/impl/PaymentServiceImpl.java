@@ -84,16 +84,18 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentResponse createPayment(PaymentRequest paymentRequest) {
         Optional<Orders> order = orderRepository.findFirstByUserIdAndOrderStatusOrderByCreatedDateDesc(userUtilService.getIdCurrentUser(), OrderStatus.PENDING);
-        if (paymentRepository.findByOrderId(order.get().getId()).get().getStatus().equals(PaymentMethod.BANK)) {
-            if (order.isPresent()) {
-                order.get().setOrderStatus(OrderStatus.CANCELLED);
-                orderRepository.save(order.get());
-                Optional<Payment> payment = paymentRepository.findByOrderId(order.get().getId());
-                payment.get().setStatus(PaymentStatus.FAILED);
-                paymentRepository.save(payment.get());
+        if(order.isPresent()){
+            if (paymentRepository.findByOrderId(order.get().getId()).get().getStatus().equals(PaymentMethod.BANK)) {
+                if (order.isPresent()) {
+                    order.get().setOrderStatus(OrderStatus.CANCELLED);
+                    orderRepository.save(order.get());
+                    Optional<Payment> payment = paymentRepository.findByOrderId(order.get().getId());
+                    payment.get().setStatus(PaymentStatus.FAILED);
+                    paymentRepository.save(payment.get());
+                }
             }
         }
-
+        
         Orders orders = createOrder();
 
         Payment payment = new Payment();
