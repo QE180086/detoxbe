@@ -15,6 +15,7 @@ import com.parttime.job.Application.projectmanagementservice.usermanagement.requ
 import com.parttime.job.Application.projectmanagementservice.usermanagement.request.ResetPassword;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.request.UpdateRoleRequest;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.response.UserResponse;
+import com.parttime.job.Application.projectmanagementservice.usermanagement.response.UserStatsResponse;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -105,7 +106,7 @@ public class UserController {
     }
 
     @PutMapping("/assign-role/{userId}")
-    public ResponseEntity<GenericResponse<UserResponse>> assignRoleForUser(@PathVariable String userId,@Valid @RequestBody UpdateRoleRequest role) {
+    public ResponseEntity<GenericResponse<UserResponse>> assignRoleForUser(@PathVariable String userId, @Valid @RequestBody UpdateRoleRequest role) {
         GenericResponse<UserResponse> response = GenericResponse.<UserResponse>builder()
                 .message(MessageDTO.builder()
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
@@ -169,5 +170,16 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-
+    @GetMapping("/growth")
+    public ResponseEntity<GenericResponse<UserStatsResponse>> getUserGrowthStats() {
+        GenericResponse<UserStatsResponse> response = GenericResponse.<UserStatsResponse>builder()
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .data(userService.getUserStats())
+                .build();
+        return ResponseEntity.ok(response);
+    }
 }

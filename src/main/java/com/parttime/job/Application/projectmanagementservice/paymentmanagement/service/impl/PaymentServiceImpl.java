@@ -18,8 +18,10 @@ import com.parttime.job.Application.projectmanagementservice.paymentmanagement.r
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.repository.PaymentRepository;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.request.PaymentRequest;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.request.SepayWebhookRequest;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.DashBoardPaymentResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.PaymentResponse;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.RevenueCompareResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.service.PaymentService;
 import com.parttime.job.Application.projectmanagementservice.point.entity.Point;
 import com.parttime.job.Application.projectmanagementservice.point.repository.PointRepository;
@@ -49,6 +51,8 @@ import org.springframework.util.StringUtils;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
@@ -84,7 +88,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentResponse createPayment(PaymentRequest paymentRequest) {
         Optional<Orders> order = orderRepository.findFirstByUserIdAndOrderStatusOrderByCreatedDateDesc(userUtilService.getIdCurrentUser(), OrderStatus.PENDING);
-        if(order.isPresent()){
+        if (order.isPresent()) {
             if (paymentRepository.findByOrderId(order.get().getId()).get().getStatus().equals(PaymentMethod.BANK)) {
                 if (order.isPresent()) {
                     order.get().setOrderStatus(OrderStatus.CANCELLED);
@@ -95,7 +99,7 @@ public class PaymentServiceImpl implements PaymentService {
                 }
             }
         }
-        
+
         Orders orders = createOrder();
 
         Payment payment = new Payment();
@@ -251,6 +255,61 @@ public class PaymentServiceImpl implements PaymentService {
         }
         List<PaymentResponse> paymentResponse = paymentMapper.toListDTO(paymentPage.getContent());
         return new PagingResponse<>(paymentResponse, pagingRequest, paymentPage.getTotalElements());
+    }
+
+    // DashBoard
+
+    @Override
+    public List<DashBoardPaymentResponse> getRevenueLastNDays(int days) {
+        LocalDateTime startDate = LocalDateTime.now().minusDays(days);
+        List<Object[]> data = paymentRepository.getRevenueFromDate(startDate);
+
+        return data.stream()
+                .map(row -> new DashBoardPaymentResponse(
+                        row[0] != null ? ((java.sql.Date) row[0]).toLocalDate() : null,
+                        row[1] != null ? ((Number) row[1]).doubleValue() : 0.0
+                ))
+                .toList();
+    }
+
+
+    @Override
+    public List<DashBoardPaymentResponse> getAllDailyRevenue() {
+        return paymentRepository.getDailyRevenue().stream()
+                .map(row -> new DashBoardPaymentResponse(
+                        row[0] != null ? ((java.sql.Date) row[0]).toLocalDate() : null,
+                        row[1] != null ? ((Number) row[1]).doubleValue() : 0.0
+                ))
+                .toList();
+    }
+
+
+    @Override
+    public RevenueCompareResponse getTotalRevenue() {
+
+        Double todayRevenue = paymentRepository.getTodayRevenue();
+        todayRevenue = todayRevenue != null ? todayRevenue : 0.0;
+
+        Double totalAllTimeRevenue = paymentRepository.getTotalRevenueByMethod(null);
+        totalAllTimeRevenue = totalAllTimeRevenue != null ? totalAllTimeRevenue : 0.0;
+
+        Double percentChange;
+        if (totalAllTimeRevenue == 0) {
+            percentChange = todayRevenue > 0 ? 100.0 : 0.0;
+        } else {
+            percentChange = (todayRevenue / totalAllTimeRevenue) * 100;
+        }
+
+        return new RevenueCompareResponse(totalAllTimeRevenue, percentChange);
+    }
+
+
+
+
+
+    @Override
+    public Double getTodayRevenue() {
+        return paymentRepository.getTodayRevenue();
     }
 
 

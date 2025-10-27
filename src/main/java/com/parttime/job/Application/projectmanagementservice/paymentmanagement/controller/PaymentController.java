@@ -7,16 +7,21 @@ import com.parttime.job.Application.common.dto.MessageDTO;
 import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.request.SortRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.PaymentMethod;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.PaymentStatus;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.request.PaymentRequest;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.request.SepayWebhookRequest;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.DashBoardPaymentResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.PaymentResponse;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.RevenueCompareResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -94,6 +99,58 @@ public class PaymentController {
         PagingResponse<PaymentResponse> payments = paymentService.getListPayment(userId, pagingRequest);
         GenericResponse<PagingResponse<PaymentResponse>> response = GenericResponse.<PagingResponse<PaymentResponse>>builder()
                 .data(payments)
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/dashboard/daily")
+    public ResponseEntity<GenericResponse<List<DashBoardPaymentResponse>>> getAllDailyRevenue() {
+        GenericResponse<List<DashBoardPaymentResponse>> response = GenericResponse.<List<DashBoardPaymentResponse>>builder()
+                .data(paymentService.getAllDailyRevenue())
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/dashboard/last-days")
+    public ResponseEntity<GenericResponse<List<DashBoardPaymentResponse>>> getRevenueLastDays(@RequestParam int days) {
+        GenericResponse<List<DashBoardPaymentResponse>> response = GenericResponse.<List<DashBoardPaymentResponse>>builder()
+                .data(paymentService.getRevenueLastNDays(days))
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/dashboard/total")
+    public ResponseEntity<GenericResponse<RevenueCompareResponse>> getTotalRevenue() {
+        GenericResponse<RevenueCompareResponse> response = GenericResponse.<RevenueCompareResponse>builder()
+                .data(paymentService.getTotalRevenue())
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/dashboard/today")
+    public ResponseEntity<GenericResponse<Double>> getTodayRevenue() {
+        GenericResponse<Double> response = GenericResponse.<Double>builder()
+                .data(paymentService.getTodayRevenue())
                 .message(MessageDTO.builder()
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)

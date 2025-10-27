@@ -40,4 +40,13 @@ public interface OrderRepository extends JpaRepository<Orders, String> {
                                 @Param("expectedDeliveryTime") LocalDateTime expectedDeliveryTime);
 
 
+    // Dashboard
+    @Query("SELECT COUNT(o) FROM Orders o WHERE o.orderStatus = 'COMPLETED'")
+    Long countTotalCompletedOrders();
+
+    @Query("SELECT COUNT(o) FROM Orders o " +
+            "WHERE o.orderStatus = 'COMPLETED' " +
+            "AND DATE(o.createdDate) = CURRENT_DATE")
+    Long countTodayCompletedOrders();
+
 }

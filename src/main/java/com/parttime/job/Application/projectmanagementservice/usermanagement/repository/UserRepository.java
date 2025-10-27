@@ -21,4 +21,11 @@ public interface UserRepository extends JpaRepository<User, String> {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 
+    // Dashboard
+
+    @Query("SELECT COUNT(u) FROM User u")
+    Long countTotalUsers();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE DATE(u.createdDate) = CURRENT_DATE")
+    Long countTodayNewUsers();
 }

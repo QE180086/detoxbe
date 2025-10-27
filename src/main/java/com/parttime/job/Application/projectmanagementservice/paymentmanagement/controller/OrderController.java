@@ -9,6 +9,7 @@ import com.parttime.job.Application.common.request.SortRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.OrderStatus;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderResponse;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderStatsResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -83,10 +84,24 @@ public class OrderController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("/status")
     public ResponseEntity<GenericResponse<OrderStatus>> checkStatusOrder(@RequestParam String orderId) {
         GenericResponse<OrderStatus> response = GenericResponse.<OrderStatus>builder()
                 .data(orderService.checkOrderStatus(orderId))
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/completed-percent")
+    public ResponseEntity<GenericResponse<OrderStatsResponse>> getCompletedOrderPercent() {
+        GenericResponse<OrderStatsResponse> response = GenericResponse.<OrderStatsResponse>builder()
+                .data(orderService.getOrderStats())
                 .message(MessageDTO.builder()
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)

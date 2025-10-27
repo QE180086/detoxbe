@@ -9,6 +9,7 @@ import com.parttime.job.Application.common.request.SortRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
 import com.parttime.job.Application.projectmanagementservice.product.request.ProductRequest;
 import com.parttime.job.Application.projectmanagementservice.product.response.ProductResponse;
+import com.parttime.job.Application.projectmanagementservice.product.response.ProductStatsResponse;
 import com.parttime.job.Application.projectmanagementservice.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class ProductController {
 
     @PutMapping("/{productId}")
     public ResponseEntity<GenericResponse<ProductResponse>> updateProduct(@PathVariable String productId,
-                                                                               @Valid @RequestBody ProductRequest request) {
+                                                                          @Valid @RequestBody ProductRequest request) {
         GenericResponse<ProductResponse> response = GenericResponse.<ProductResponse>builder()
                 .message(MessageDTO.builder()
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
@@ -109,6 +110,19 @@ public class ProductController {
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.DELETE_DATA_SUCCESS)
                         .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/growth")
+    public ResponseEntity<GenericResponse<ProductStatsResponse>> getProductGrowthStats() {
+        GenericResponse<ProductStatsResponse> response = GenericResponse.<ProductStatsResponse>builder()
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.GET_DATA_SUCCESS)
+                        .build())
+                .data(productService.getProductStats())
                 .isSuccess(true)
                 .build();
         return ResponseEntity.ok(response);

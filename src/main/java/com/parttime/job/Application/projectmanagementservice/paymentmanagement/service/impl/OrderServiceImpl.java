@@ -10,6 +10,7 @@ import com.parttime.job.Application.projectmanagementservice.paymentmanagement.e
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.mapper.OrderMapper;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.repository.OrderRepository;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderResponse;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderStatsResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.service.OrderService;
 import com.parttime.job.Application.projectmanagementservice.product.constant.ProductConstant;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import static com.parttime.job.Application.common.constant.GlobalVariable.PAGE_S
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+
     @Override
     public PagingResponse<OrderResponse> getListOrder(String searchText, PagingRequest pagingRequest) {
         Sort sort = PagingUtil.createSort(pagingRequest);
@@ -74,6 +76,20 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return orders.get().getOrderStatus();
+    }
+
+    @Override
+    public OrderStatsResponse getOrderStats() {
+        Long totalCompleted = orderRepository.countTotalCompletedOrders();
+        Long todayCompleted = orderRepository.countTodayCompletedOrders();
+
+        double increasePercent = 0.0;
+
+        if (totalCompleted != null && totalCompleted > 0) {
+            increasePercent = (todayCompleted.doubleValue() / totalCompleted.doubleValue()) * 100.0;
+        }
+
+        return new OrderStatsResponse(totalCompleted, increasePercent);
     }
 
 }

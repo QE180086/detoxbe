@@ -20,6 +20,7 @@ import com.parttime.job.Application.projectmanagementservice.usermanagement.requ
 import com.parttime.job.Application.projectmanagementservice.usermanagement.request.ResetPassword;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.request.UpdateRoleRequest;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.response.UserResponse;
+import com.parttime.job.Application.projectmanagementservice.usermanagement.response.UserStatsResponse;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.service.EmailService;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.service.UserService;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.service.UserUtilService;
@@ -179,4 +180,16 @@ public class UserServiceImpl implements UserService {
         }
         return userMapper.toUserDTO(user);
     }
+
+    @Override
+    public UserStatsResponse getUserStats() {
+        Long totalUsers = userRepository.countTotalUsers();
+        Long todayNewUsers = userRepository.countTodayNewUsers();
+
+        double percent = 0.0;
+        if (totalUsers != null && totalUsers > 0) {
+            percent = (todayNewUsers.doubleValue() / totalUsers.doubleValue()) * 100.0;
+        }
+
+        return new UserStatsResponse(totalUsers, percent);    }
 }
