@@ -4,6 +4,7 @@ import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
 import com.parttime.job.Application.projectmanagementservice.product.request.ProductRequest;
 import com.parttime.job.Application.projectmanagementservice.product.response.ProductResponse;
+import com.parttime.job.Application.projectmanagementservice.product.response.ProductStatsResponse;
 
 public interface ProductService {
     PagingResponse<ProductResponse> getListProduct(String searchText, PagingRequest pagingRequest);
@@ -17,4 +18,6 @@ public interface ProductService {
     void delete(String productId);
 
 //    Integer countAllProduct(TypeTarget typeTarget);
+
+    ProductStatsResponse getProductStats();
 }

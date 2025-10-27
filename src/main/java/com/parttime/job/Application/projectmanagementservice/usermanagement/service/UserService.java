@@ -8,6 +8,7 @@ import com.parttime.job.Application.projectmanagementservice.usermanagement.requ
 import com.parttime.job.Application.projectmanagementservice.usermanagement.request.ResetPassword;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.request.UpdateRoleRequest;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.response.UserResponse;
+import com.parttime.job.Application.projectmanagementservice.usermanagement.response.UserStatsResponse;
 
 public interface UserService {
     PagingResponse<UserResponse> getAllUser(String searchText, PagingRequest request);
@@ -30,4 +31,5 @@ public interface UserService {
 
     UserResponse getMe();
 
+    UserStatsResponse getUserStats();
 }

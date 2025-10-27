@@ -20,4 +20,11 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     @Query("SELECT COUNT(p) > 0 FROM Product p WHERE p.name = :name AND p.id <> :id")
     boolean existsByNameAndIdNot(@Param("name") String name, @Param("id") String id);
 
+    // Dashboard
+
+    @Query("SELECT COUNT(p) FROM Product p")
+    Long countTotalProducts();
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE DATE(p.createdDate) = CURRENT_DATE")
+    Long countTodayProducts();
 }

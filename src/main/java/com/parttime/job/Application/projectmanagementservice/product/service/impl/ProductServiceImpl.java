@@ -13,6 +13,7 @@ import com.parttime.job.Application.projectmanagementservice.product.repository.
 import com.parttime.job.Application.projectmanagementservice.product.repository.TypeProductRepository;
 import com.parttime.job.Application.projectmanagementservice.product.request.ProductRequest;
 import com.parttime.job.Application.projectmanagementservice.product.response.ProductResponse;
+import com.parttime.job.Application.projectmanagementservice.product.response.ProductStatsResponse;
 import com.parttime.job.Application.projectmanagementservice.product.service.ProductService;
 import com.parttime.job.Application.projectmanagementservice.usermanagement.service.UserUtilService;
 import lombok.RequiredArgsConstructor;
@@ -137,6 +138,18 @@ public class ProductServiceImpl implements ProductService {
         }
         productRepository.delete(product.get());
     }
+
+    @Override
+    public ProductStatsResponse getProductStats() {
+        Long totalProducts = productRepository.countTotalProducts();
+        Long todayProducts = productRepository.countTodayProducts();
+
+        double todayPercent = 0.0;
+        if (totalProducts != null && totalProducts > 0) {
+            todayPercent = (todayProducts.doubleValue() / totalProducts.doubleValue()) * 100.0;
+        }
+
+        return new ProductStatsResponse(totalProducts, todayPercent);    }
 
 //    @Override
 //    public Integer countAllProduct(TypeTarget typeTarget) {

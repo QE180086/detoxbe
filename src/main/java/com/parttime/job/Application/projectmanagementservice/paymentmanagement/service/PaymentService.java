@@ -2,10 +2,15 @@ package com.parttime.job.Application.projectmanagementservice.paymentmanagement.
 
 import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.PaymentMethod;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.PaymentStatus;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.request.PaymentRequest;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.request.SepayWebhookRequest;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.DashBoardPaymentResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.PaymentResponse;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.RevenueCompareResponse;
+
+import java.util.List;
 
 public interface PaymentService {
     PaymentResponse createPayment(PaymentRequest paymentRequest);
@@ -16,4 +21,12 @@ public interface PaymentService {
 
     PagingResponse<PaymentResponse> getListPayment(String userId, PagingRequest pagingRequest);
 
+    // dashboard
+    List<DashBoardPaymentResponse> getRevenueLastNDays(int days);
+
+    List<DashBoardPaymentResponse> getAllDailyRevenue();
+
+    RevenueCompareResponse getTotalRevenue();
+
+    Double getTodayRevenue();
 }
