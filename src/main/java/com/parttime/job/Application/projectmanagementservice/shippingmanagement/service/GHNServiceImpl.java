@@ -136,6 +136,7 @@ public class GHNServiceImpl implements GHNService {
         Map<String, Object> body = new HashMap<>();
         body.put("from_district_id", fromDistrictId);
         body.put("service_type_id", 2);
+        body.put("service_id", 53321);
         body.put("to_district_id", toDistrictId);
         body.put("to_ward_code", toWardCode);
         body.put("weight", weight);
