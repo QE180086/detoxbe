@@ -13,7 +13,7 @@ public class MessageResponse {
     private String senderAvatar;
     private String text;
     private String imageUrl;
-    private LocalDateTime createdAt;
+    private LocalDateTime createdDate;
     private boolean seen;
     private LocalDateTime seenAt;
 }
