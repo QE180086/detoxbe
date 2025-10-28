@@ -1,5 +1,7 @@
 package com.parttime.job.Application.projectmanagementservice.chatmanagement.service.impl;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.parttime.job.Application.common.constant.MessageCodeConstant;
 import com.parttime.job.Application.common.exception.AppException;
 import org.springframework.stereotype.Service;
@@ -10,26 +12,46 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class FileStorageService {
-    private final Path root = Paths.get("uploads");
+    private Cloudinary cloudinary;
+    private static final String URL = "url";
 
-    public FileStorageService() {
+
+    public String uploadSingle(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "File is empty");
+        }
+
         try {
-            Files.createDirectories(root);
-        } catch (IOException ignored) {
+            Map<String, Object> uploadOptions = ObjectUtils.asMap(
+                    "resource_type", "auto",
+                    "folder", "parttime_job_uploads"
+            );
+
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadOptions);
+            return uploadResult.get(URL).toString();
+
+        } catch (IOException e) {
+            throw new AppException(MessageCodeConstant.M024_UPLOAD_FILE_FAIL, "Upload failed: " + e.getMessage());
         }
     }
 
-    public String store(MultipartFile file) {
-        String filename = UUID.randomUUID() + "-" + StringUtils.cleanPath(file.getOriginalFilename());
-        try {
-            Files.copy(file.getInputStream(), root.resolve(filename));
-            return "/uploads/" + filename;
-        } catch (IOException e) {
-            throw new AppException(MessageCodeConstant.M002_ERROR, e.getMessage());
+
+    public List<String> uploadMultiple(MultipartFile[] files) {
+        if (files == null || files.length == 0) {
+            throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "No files were uploaded");
         }
+
+        List<String> urls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            urls.add(uploadSingle(file));
+        }
+        return urls;
     }
 }

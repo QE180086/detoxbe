@@ -160,7 +160,7 @@ public class PaymentServiceImpl implements PaymentService {
 // Set order
         Orders order = payment.getOrders();
 
-        if (order.getTotalAmount() < request.getTransferAmount()) {
+        if ((order.getTotalAmount() + order.getShippingFee()) < request.getTransferAmount()) {
             throw new AppException(MessageCodeConstant.M005_INVALID, "Amount mismatch for order: " + order.getId());
         }
         order.setOrderStatus(OrderStatus.COMPLETED);
@@ -302,9 +302,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         return new RevenueCompareResponse(totalAllTimeRevenue, percentChange);
     }
-
-
-
 
 
     @Override
