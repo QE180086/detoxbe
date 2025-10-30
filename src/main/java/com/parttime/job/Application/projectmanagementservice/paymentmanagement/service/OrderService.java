@@ -16,4 +16,6 @@ public interface OrderService {
     OrderStatus checkOrderStatus(String orderId);
 
     OrderStatsResponse getOrderStats();
+
+    OrderResponse updateStatusOrder(String orderId, OrderStatus status);
 }
