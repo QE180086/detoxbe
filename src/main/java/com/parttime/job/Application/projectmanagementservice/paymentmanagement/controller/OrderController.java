@@ -8,8 +8,10 @@ import com.parttime.job.Application.common.request.PagingRequest;
 import com.parttime.job.Application.common.request.SortRequest;
 import com.parttime.job.Application.common.response.PagingResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.OrderStatus;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.enumration.PaymentStatus;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.OrderStatsResponse;
+import com.parttime.job.Application.projectmanagementservice.paymentmanagement.response.PaymentResponse;
 import com.parttime.job.Application.projectmanagementservice.paymentmanagement.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -102,6 +104,21 @@ public class OrderController {
     public ResponseEntity<GenericResponse<OrderStatsResponse>> getCompletedOrderPercent() {
         GenericResponse<OrderStatsResponse> response = GenericResponse.<OrderStatsResponse>builder()
                 .data(orderService.getOrderStats())
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<GenericResponse<OrderResponse>> updateOrderStatus(@PathVariable String orderId,
+                                                                                @RequestParam OrderStatus status) {
+        OrderResponse orderResponse = orderService.updateStatusOrder(orderId, status);
+        GenericResponse<OrderResponse> response = GenericResponse.<OrderResponse>builder()
+                .data(orderResponse)
                 .message(MessageDTO.builder()
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
