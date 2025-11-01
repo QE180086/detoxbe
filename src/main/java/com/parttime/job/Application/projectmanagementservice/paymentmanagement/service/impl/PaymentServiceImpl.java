@@ -54,9 +54,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.parttime.job.Application.common.constant.GlobalVariable.PAGE_SIZE_INDEX;
 
@@ -261,16 +260,27 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<DashBoardPaymentResponse> getRevenueLastNDays(int days) {
-        LocalDateTime startDate = LocalDateTime.now().minusDays(days);
-        List<Object[]> data = paymentRepository.getRevenueFromDate(startDate);
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(days - 1); 
+        List<Object[]> data = paymentRepository.getRevenueFromDate(startDate.atStartOfDay());
 
-        return data.stream()
-                .map(row -> new DashBoardPaymentResponse(
-                        row[0] != null ? ((java.sql.Date) row[0]).toLocalDate() : null,
-                        row[1] != null ? ((Number) row[1]).doubleValue() : 0.0
-                ))
-                .toList();
+        Map<LocalDate, Double> revenueMap = data.stream()
+                .collect(Collectors.toMap(
+                        row -> ((java.sql.Date) row[0]).toLocalDate(),
+                        row -> ((Number) row[1]).doubleValue()
+                ));
+
+
+        List<DashBoardPaymentResponse> result = new ArrayList<>();
+        for (int i = 0; i < days; i++) {
+            LocalDate date = startDate.plusDays(i);
+            double revenue = revenueMap.getOrDefault(date, 0.0);
+            result.add(new DashBoardPaymentResponse(date, revenue));
+        }
+
+        return result;
     }
+
 
 
     @Override
