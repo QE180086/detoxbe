@@ -52,15 +52,22 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             "ORDER BY DATE(p.createdDate)")
     List<Object[]> getRevenueFromDate(@Param("startDate") LocalDateTime startDate);
 
-    @Query("SELECT SUM(p.amount) FROM Payment p " +
-            "WHERE p.status = 'COMPLETED' " +
+    @Query("SELECT SUM(o.totalAmount) FROM Orders o " +
+            "JOIN o.orderItems oi " +
+            "JOIN Payment p ON p.orders = o " +
+            "WHERE o.orderStatus = 'COMPLETED' " +
+            "AND p.status = 'COMPLETED' " +
             "AND (:method IS NULL OR p.method = :method)")
     Double getTotalRevenueByMethod(@Param("method") PaymentMethod method);
 
-    @Query("SELECT SUM(p.amount) FROM Payment p " +
-            "WHERE p.status = 'COMPLETED' " +
-            "AND DATE(p.createdDate) = CURRENT_DATE")
+
+    @Query("SELECT SUM(o.totalAmount) FROM Orders o " +
+            "JOIN Payment p ON p.orders = o " +
+            "WHERE o.orderStatus = 'COMPLETED' " +
+            "AND p.status = 'COMPLETED' " +
+            "AND FUNCTION('DATE', p.createdDate) = CURRENT_DATE")
     Double getTodayRevenue();
+
 
     @Query("SELECT SUM(p.amount) FROM Payment p " +
             "WHERE p.status = 'COMPLETED' " +
