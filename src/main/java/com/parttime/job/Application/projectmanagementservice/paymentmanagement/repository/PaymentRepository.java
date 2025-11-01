@@ -53,7 +53,6 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     List<Object[]> getRevenueFromDate(@Param("startDate") LocalDateTime startDate);
 
     @Query("SELECT SUM(o.totalAmount) FROM Orders o " +
-            "JOIN o.orderItems oi " +
             "JOIN Payment p ON p.orders = o " +
             "WHERE o.orderStatus = 'COMPLETED' " +
             "AND p.status = 'COMPLETED' " +
