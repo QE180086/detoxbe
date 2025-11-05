@@ -39,6 +39,7 @@ public interface OrderRepository extends JpaRepository<Orders, String> {
                                 @Param("orderCode") String orderCode,
                                 @Param("expectedDeliveryTime") LocalDateTime expectedDeliveryTime);
 
+    Optional<Orders> findByOrderCode(String orderCode);
 
     // Dashboard
     @Query("SELECT COUNT(o) FROM Orders o WHERE o.orderStatus = 'COMPLETED'")
