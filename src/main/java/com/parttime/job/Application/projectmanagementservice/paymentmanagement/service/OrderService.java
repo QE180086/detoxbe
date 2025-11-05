@@ -18,4 +18,9 @@ public interface OrderService {
     OrderStatsResponse getOrderStats();
 
     OrderResponse updateStatusOrder(String orderId, OrderStatus status);
+
+    String deleteByOrder(String orderCode);
+
+    String deleteByOrderId(String orderId);
+
 }

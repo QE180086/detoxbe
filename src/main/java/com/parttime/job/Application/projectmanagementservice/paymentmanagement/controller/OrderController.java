@@ -115,10 +115,36 @@ public class OrderController {
 
     @PutMapping("/{orderId}/status")
     public ResponseEntity<GenericResponse<OrderResponse>> updateOrderStatus(@PathVariable String orderId,
-                                                                                @RequestParam OrderStatus status) {
+                                                                            @RequestParam OrderStatus status) {
         OrderResponse orderResponse = orderService.updateStatusOrder(orderId, status);
         GenericResponse<OrderResponse> response = GenericResponse.<OrderResponse>builder()
                 .data(orderResponse)
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{ordercode}/code")
+    public ResponseEntity<GenericResponse<String>> deleteByOrderCode(@PathVariable String ordercode) {
+        GenericResponse<String> response = GenericResponse.<String>builder()
+                .data(orderService.deleteByOrder(ordercode))
+                .message(MessageDTO.builder()
+                        .messageCode(MessageCodeConstant.M001_SUCCESS)
+                        .messageDetail(MessageConstant.SUCCESS)
+                        .build())
+                .isSuccess(true)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{orderid}/id")
+    public ResponseEntity<GenericResponse<String>> deleteByOrderId(@PathVariable String orderid) {
+        GenericResponse<String> response = GenericResponse.<String>builder()
+                .data(orderService.deleteByOrderId(orderid))
                 .message(MessageDTO.builder()
                         .messageCode(MessageCodeConstant.M001_SUCCESS)
                         .messageDetail(MessageConstant.SUCCESS)
