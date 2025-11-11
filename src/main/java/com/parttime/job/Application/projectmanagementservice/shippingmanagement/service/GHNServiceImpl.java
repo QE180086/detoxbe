@@ -80,7 +80,7 @@ public class GHNServiceImpl implements GHNService {
         body.put("service_type_id", 2);
 
         if (payment.getMethod().equals(PaymentMethod.CASH)) {
-            body.put("cod_amount",(int) (payment.getAmount() + payment.getOrders().getShippingFee()));
+            body.put("cod_amount",(int) (payment.getAmount()));
         } else {
             body.put("cod_amount", 0);
         }
