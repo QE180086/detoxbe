@@ -151,6 +151,10 @@ public class OrderServiceImpl implements OrderService {
             }
             point.setCurrentPoints((int) (payment.get().getAmount() / 1000 + point.getCurrentPoints()));
             pointRepository.save(point);
+        } else if (status == OrderStatus.CANCELLED) {
+            order = payment.get().getOrders();
+            order.setOrderStatus(OrderStatus.CANCELLED);
+            orderRepository.save(order);
         }
         return orderMapper.toDTO(order);
     }
