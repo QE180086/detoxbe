@@ -117,7 +117,7 @@ public class OrderServiceImpl implements OrderService {
         if (payment.isEmpty()) {
             throw new AppException(MessageCodeConstant.M003_NOT_FOUND, "Payment not found");
         }
-        if (payment.get().getStatus() != PaymentStatus.PENDING || payment.get().getMethod() != PaymentMethod.CASH) {
+        if (payment.get().getStatus() == PaymentStatus.COMPLETED || payment.get().getMethod() != PaymentMethod.CASH) {
             throw new AppException(MessageCodeConstant.M005_INVALID, "Cannot update status for payment with id: " + payment.get().getId());
         }
         payment.get().setStatus(status == OrderStatus.COMPLETED ? PaymentStatus.COMPLETED : PaymentStatus.FAILED);
